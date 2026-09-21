@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Environment, Lightformer, Sparkles } from '@react-three/drei'
+import { ContactShadows, Environment, Lightformer, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
 import FlowerModel, { createSunflowerResources } from './FlowerModel'
 import SunModel from './SunModel'
@@ -33,10 +33,10 @@ function GardenFloor({ colors, count }) {
     grass.current.instanceMatrix.needsUpdate = true; grass.current.instanceColor.needsUpdate = true
   }, [count, colors.leaf, colors.leafDark])
   return <>
-    <mesh position={[0, -0.11, -0.45]} scale={[2.85, 0.12, 1.85]}>
+    <mesh position={[0, -0.11, -0.45]} scale={[2.85, 0.12, 1.85]} receiveShadow>
       <sphereGeometry args={[1, 40, 12]} /><meshStandardMaterial color={colors.ground} roughness={1} />
     </mesh>
-    <instancedMesh ref={grass} args={[geometry, null, count]} frustumCulled={false}>
+    <instancedMesh ref={grass} args={[geometry, null, count]} frustumCulled={false} receiveShadow>
       <meshStandardMaterial side={THREE.DoubleSide} roughness={0.9} />
     </instancedMesh>
   </>
@@ -70,13 +70,28 @@ function Garden({ config, active, cycle, input, reducedMotion, onReady, rotation
     camera.position.x = THREE.MathUtils.lerp(camera.position.x, reducedMotion || turning.dragging ? 0 : input.current.x * 0.28, damping)
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, reducedMotion || turning.dragging ? 0 : input.current.y * 0.20, damping)
     camera.lookAt(target)
-    light.current.intensity = THREE.MathUtils.lerp(light.current.intensity, active ? 3.4 : 2.3, damping)
+    light.current.intensity = THREE.MathUtils.lerp(light.current.intensity, active ? 3.0 : 2.2, damping)
   })
   useEffect(() => { gl.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.6 : 2)) }, [gl, mobile])
   return <>
     {config.sun && <SunModel config={config} active={active} cycle={cycle} reducedMotion={reducedMotion} />}
-    <ambientLight intensity={active ? 0.7 : 0.25} color={config.ui.colors.ambient} />
-    <directionalLight ref={light} position={[-3, 5, 5]} intensity={2.7} color={config.ui.colors.sunlight} />
+    <ambientLight intensity={active ? 0.75 : 0.28} color={config.ui.colors.ambient} />
+    <directionalLight
+      ref={light}
+      position={[-3.5, 5.5, 5]}
+      intensity={2.9}
+      color={config.ui.colors.sunlight}
+      castShadow
+      shadow-mapSize-width={mobile ? 1024 : 2048}
+      shadow-mapSize-height={mobile ? 1024 : 2048}
+      shadow-camera-near={0.5}
+      shadow-camera-far={20}
+      shadow-camera-left={-4.5}
+      shadow-camera-right={4.5}
+      shadow-camera-top={4.5}
+      shadow-camera-bottom={-4.5}
+      shadow-bias={-0.00008}
+    />
     <pointLight position={[3, -1, 3]} intensity={active ? 7 : 3} color={config.ui.colors.glowYellow} />
     <Environment resolution={128} frames={1}>
       <Lightformer form="rect" intensity={2.8} color={config.ui.colors.sunlight} scale={[6, 9, 1]} position={[-3, 4, 5]} target={[0, 0, 0]} />
@@ -85,6 +100,7 @@ function Garden({ config, active, cycle, input, reducedMotion, onReady, rotation
     <group position={gardenPosition} scale={gardenScale}>
       <group ref={turntable} position={[0, 2, 0]}><group position={[0, -2, 0]}>
       <GardenFloor colors={config.ui.colors} count={mobile ? config.garden.mobileGrassCount : config.garden.grassCount} />
+      <ContactShadows position={[0, -0.10, -0.2]} opacity={0.65} scale={6.5} blur={2.0} far={3.0} resolution={512} color="#1b2b10" />
       {config.garden.plants.map((plant, index) => <FlowerModel key={index} plant={plant} resources={resources}
         detail={plant.detail && (!mobile || index === config.garden.plants.length - 1)}
         colors={config.ui.colors} active={active} cycle={cycle} reducedMotion={reducedMotion} duration={config.animation.bloomDuration} />)}
@@ -107,7 +123,7 @@ export default function Scene3D(props) {
     return () => { document.removeEventListener('visibilitychange', change); cleanup.current() }
   }, [])
   if (lost) return props.fallback
-  return <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 8.8], fov: 40, near: 0.1, far: 35 }}
+  return <Canvas shadows="soft" dpr={[1, 2]} camera={{ position: [0, 0, 8.8], fov: 40, near: 0.1, far: 35 }}
     gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
     frameloop={visible ? 'always' : 'never'} fallback={<Unavailable onFailure={props.onFailure}>{props.fallback}</Unavailable>}
     onCreated={({ gl }) => {

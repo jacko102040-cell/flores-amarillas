@@ -311,7 +311,7 @@ function FlowerHead({ colors, progress, resources, detail, phase }) {
 
 function Leaf({ resources, position, rotation, scale, detail }) {
   return <group position={position} rotation={rotation} scale={scale} dispose={null}>
-    <mesh geometry={resources.leaf} material={resources.leafMaterial} />
+    <mesh geometry={resources.leaf} material={resources.leafMaterial} castShadow receiveShadow />
     {detail && <lineSegments geometry={resources.veins} material={resources.veinMaterial} />}
   </group>
 }
@@ -362,7 +362,7 @@ export default function FlowerModel({ colors, active, cycle, reducedMotion, dura
   })
   return <group position={plant.position}>
     <group ref={group}>
-      <mesh geometry={stem} material={resources.stemMaterial} dispose={null} />
+      <mesh geometry={stem} material={resources.stemMaterial} dispose={null} castShadow receiveShadow />
       {leaves.map((leaf, i) => <Leaf key={i} {...leaf} resources={resources} detail={detail} />)}
       <group position={[lean, height, 0]} rotation={[facing[0], facing[1], facing[2]]} scale={headScale}>
         <FlowerHead colors={colors} progress={progress} resources={resources} detail={detail} phase={phase} />
