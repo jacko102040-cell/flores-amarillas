@@ -4,6 +4,7 @@ import { ContactShadows, Environment, Lightformer, Sparkles } from '@react-three
 import * as THREE from 'three'
 import FlowerModel, { createSunflowerResources, FallenPetals } from './FlowerModel'
 import SunModel from './SunModel'
+import MoonModel from './MoonModel'
 import CompanionFlowers from './CompanionFlowers'
 
 function GardenFloor({ colors, count }) {
@@ -147,6 +148,7 @@ function Garden({ config, active, cycle, input, reducedMotion, onReady, rotation
   useEffect(() => { gl.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.6 : 2)) }, [gl, mobile])
   return <>
     <fog attach="fog" args={[active ? config.ui.colors.springMist : config.ui.colors.backgroundDark, 14, 34]} />
+    <MoonModel config={config} active={active} cycle={cycle} reducedMotion={reducedMotion} />
     {config.sun && <SunModel config={config} active={active} cycle={cycle} reducedMotion={reducedMotion} />}
     <ambientLight intensity={active ? 0.75 : 0.28} color={config.ui.colors.ambient} />
     <directionalLight
@@ -183,7 +185,7 @@ function Garden({ config, active, cycle, input, reducedMotion, onReady, rotation
       </group></group>
     </group>
     {!reducedMotion && <Sparkles count={mobile ? 30 : 55} scale={[mobile ? 3 : 8, 5, 3]} size={mobile ? 1.8 : 2.2}
-      speed={active ? 0.22 : 0.10} opacity={active ? 0.5 : 0.32} color={config.ui.colors.pollen} noise={0.3} />}
+      speed={active ? 0.22 : 0.10} opacity={active ? 0.5 : 0.35} color={active ? config.ui.colors.pollen : '#cbe2fc'} noise={0.3} />}
   </>
 }
 
