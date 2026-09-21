@@ -60,69 +60,68 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
           <span>{ready || loadSlow ? ui.tapToStartText : ui.loading}</span><span className="button-sun transition-transform duration-700 group-hover:rotate-90"><SunIcon className="h-7 w-7" /></span>
         </button>
         <p className="start-hint">{ui.startHint}</p>
-      </motion.section> : (!exploreMode && <motion.section key={`message-${cycle}`} className="message-card pointer-events-auto" aria-label={ui.messageLabel} aria-hidden={!revealed}
+      </motion.section> : (!exploreMode && <motion.section key={`message-${cycle}`} className={`message-card pointer-events-auto ${actionsOpen ? 'card-contracted' : 'card-extended'}`} aria-label={ui.messageLabel} aria-hidden={!revealed}
         initial={{ opacity: 0, y: 22 }} animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 22 }} transition={transition}>
         <div className="message-top flex items-center justify-between"><span>{copy(ui.messageTo)}</span><SunIcon className="h-5 w-5" /></div>
         {revealed && <Typewriter lines={messages.typewriterLines} animation={animation} reducedMotion={reducedMotion} />}
-        <div className="signature"><span>~{settings.senderName}</span></div>
+        <div className="message-bottom flex items-center justify-between mt-3">
+          <button
+            type="button"
+            className="note-arrow-toggle"
+            onClick={() => setActionsOpen(v => !v)}
+            aria-label={actionsOpen ? "Ocultar botones" : "Mostrar opciones"}
+            aria-expanded={actionsOpen}
+            title={actionsOpen ? "Ocultar botones" : "Mostrar opciones"}
+          >
+            <svg
+              className={`note-arrow-icon ${actionsOpen ? 'is-open' : ''}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div className="signature"><span>~{settings.senderName}</span></div>
+        </div>
       </motion.section>)}
     </AnimatePresence>
     <footer className="footer flex items-center justify-between gap-4 pointer-events-none">
-      <div className="footer-left pointer-events-auto flex items-center gap-2 sm:gap-3">
+      <div className="footer-left pointer-events-auto flex items-center">
         {entered && (
-          <>
-            <button
-              type="button"
-              className="toolbar-toggle"
-              onClick={() => setActionsOpen(v => !v)}
-              aria-label={actionsOpen ? "Ocultar opciones" : "Mostrar opciones"}
-              aria-expanded={actionsOpen}
-              title={actionsOpen ? "Ocultar botones" : "Mostrar botones"}
-            >
-              <svg
-                className={`chevron-arrow ${actionsOpen ? 'is-open' : ''}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          <AnimatePresence>
+            {actionsOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 15, scale: 0.96 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="toolbar-actions"
               >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-
-            <AnimatePresence>
-              {actionsOpen && (
-                <motion.div
-                  initial={{ opacity: 0, x: -12, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -12, scale: 0.95 }}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                  className="toolbar-actions"
+                <button type="button" className="replay-button" onClick={onToggleExplore} aria-label="Modo Explorar en pantalla completa">
+                  <span aria-hidden="true">{exploreMode ? '📜' : '👁️'}</span><span>{exploreMode ? 'Ver dedicatoria' : 'Explorar'}</span>
+                </button>
+                <button type="button" className="replay-button" onClick={onResetView} aria-label={ui.resetViewLabel}>{ui.resetView}</button>
+                {revealed && !exploreMode && (
+                  <button type="button" className="replay-button" onClick={onReplay} aria-label={ui.replayLabel}>
+                    <span aria-hidden="true">↺</span><span>{ui.replay}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="audio-button flex items-center gap-2"
+                  onClick={audio.toggle}
+                  aria-pressed={audio.status === 'playing'}
+                  aria-label={audio.status === 'playing' ? ui.pauseAudio : ui.playAudio}
                 >
-                  <button type="button" className="replay-button" onClick={onToggleExplore} aria-label="Modo Explorar en pantalla completa">
-                    <span aria-hidden="true">{exploreMode ? '📜' : '👁️'}</span><span>{exploreMode ? 'Ver dedicatoria' : 'Explorar'}</span>
-                  </button>
-                  <button type="button" className="replay-button" onClick={onResetView} aria-label={ui.resetViewLabel}>{ui.resetView}</button>
-                  {revealed && !exploreMode && (
-                    <button type="button" className="replay-button" onClick={onReplay} aria-label={ui.replayLabel}>
-                      <span aria-hidden="true">↺</span><span>{ui.replay}</span>
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="audio-button flex items-center gap-2"
-                    onClick={audio.toggle}
-                    aria-pressed={audio.status === 'playing'}
-                    aria-label={audio.status === 'playing' ? ui.pauseAudio : ui.playAudio}
-                  >
-                    <AudioIcon playing={audio.status === 'playing'} /><span>{ui.audioStates[audio.status]}</span>
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </>
+                  <AudioIcon playing={audio.status === 'playing'} /><span>{ui.audioStates[audio.status]}</span>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         )}
       </div>
       <div className="footer-right pointer-events-auto">
