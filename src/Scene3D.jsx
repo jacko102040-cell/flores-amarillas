@@ -10,14 +10,10 @@ function GardenFloor({ colors, count }) {
   const grass = useRef()
   const geometry = useMemo(() => {
     const positions = [], indices = []
-    const rows = 8
-    for (let i = 0; i <= rows; i++) {
-      const t = i / rows
-      const width = 0.052 * Math.pow(1 - t, 0.75) + 0.002
-      const curveX = t * t * 0.18
-      const curveZ = t * t * 0.28 - 0.05 * Math.sin(t * Math.PI)
-      positions.push(-width + curveX, t * 1.15, curveZ, width + curveX, t * 1.15, curveZ)
-      if (i < rows) { const a = i * 2; indices.push(a, a + 1, a + 2, a + 2, a + 1, a + 3) }
+    for (let i = 0; i <= 5; i++) {
+      const t = i / 5, width = 0.036 * (1 - t) + 0.001
+      positions.push(-width + t * t * 0.12, t, t * t * 0.20, width + t * t * 0.12, t, t * t * 0.20)
+      if (i < 5) { const a = i * 2; indices.push(a, a + 1, a + 2, a + 2, a + 1, a + 3) }
     }
     const blade = new THREE.BufferGeometry()
     blade.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
@@ -27,52 +23,31 @@ function GardenFloor({ colors, count }) {
   }, [])
   useEffect(() => () => geometry.dispose(), [geometry])
 
-  const totalCount = count * 3
+  const totalCount = Math.floor(count * 2.2)
 
   useLayoutEffect(() => {
     if (!grass.current) return
     const dummy = new THREE.Object3D(), shade = new THREE.Color()
-    const dark = new THREE.Color(colors.leafDark), light = new THREE.Color(colors.leaf), gold = new THREE.Color(colors.seedLight)
+    const dark = new THREE.Color(colors.leafDark), light = new THREE.Color(colors.leaf)
     
     for (let i = 0; i < totalCount; i++) {
       const theta = i * Math.PI * (3 - Math.sqrt(5))
       const radiusRatio = Math.sqrt((i + 0.5) / totalCount)
-      const x = Math.cos(theta) * radiusRatio * 3.6 + (Math.sin(i * 3.1) - 0.5) * 0.35
-      const z = Math.sin(theta) * radiusRatio * 2.4 - 0.45 + (Math.cos(i * 4.3) - 0.5) * 0.35
+      const x = Math.cos(theta) * radiusRatio * 3.65
+      const z = Math.sin(theta) * radiusRatio * 2.35 - 0.45
       
-      // Calculate exact height on top of the ground dome so blades stick out above the soil
-      const nx = Math.min(1, Math.abs(x / 3.85))
-      const nz = Math.min(1, Math.abs((z + 0.45) / 2.65))
-      const domeFactor = Math.max(0, 1 - (nx * nx + nz * nz))
-      const surfaceY = -0.11 + 0.13 * Math.sqrt(domeFactor) - 0.02
-      
-      dummy.position.set(x, surfaceY, z)
-      
-      const yaw = theta + (Math.sin(i * 2.7) - 0.5) * 0.8
-      const pitch = (Math.sin(i * 1.9) - 0.5) * 0.28
-      const roll = (Math.cos(i * 3.4) - 0.5) * 0.42
-      dummy.rotation.set(pitch, yaw, roll)
-      
-      const isTall = i % 4 === 0
-      const scaleH = (isTall ? 0.65 : 0.38) + (0.5 + Math.sin(i * 7.3) * 0.5) * 0.45
-      const scaleW = 1.1 + (i % 3) * 0.35
-      dummy.scale.set(scaleW, scaleH, 1.2)
+      dummy.position.set(x, 0, z)
+      dummy.rotation.set(0, theta, Math.sin(i * 2.1) * 0.23)
+      dummy.scale.set(0.8 + (i % 3) * 0.2, 0.15 + (0.5 + Math.sin(i * 8.7) * 0.5) * 0.4, 1)
       dummy.updateMatrix()
       grass.current.setMatrixAt(i, dummy.matrix)
 
-      // Color variation: mix deep moss green, bright spring green, and golden tips
-      if (i % 9 === 0) {
-        shade.copy(gold).lerp(light, 0.45)
-      } else if (i % 3 === 0) {
-        shade.copy(light).lerp(dark, 0.2)
-      } else {
-        shade.copy(dark).lerp(light, 0.35 + (i % 7) / 10)
-      }
+      shade.copy(dark).lerp(light, 0.35 + (i % 7) / 10)
       grass.current.setColorAt(i, shade)
     }
     grass.current.instanceMatrix.needsUpdate = true
     grass.current.instanceColor.needsUpdate = true
-  }, [totalCount, colors.leaf, colors.leafDark, colors.seedLight])
+  }, [totalCount, colors.leaf, colors.leafDark])
 
   return <>
     {/* Extended organic ground mound */}
@@ -81,15 +56,15 @@ function GardenFloor({ colors, count }) {
       <meshStandardMaterial color={colors.ground} roughness={0.95} />
     </mesh>
     
-    {/* Background meadow plane so ground is never empty or cut off */}
+    {/* Background meadow plane so ground is never empty */}
     <mesh position={[0, -0.14, -0.5]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <circleGeometry args={[10, 32]} />
       <meshStandardMaterial color={colors.ground} roughness={1} transparent opacity={0.88} />
     </mesh>
 
-    {/* Rich 3D grass carpet tufts */}
+    {/* Original grass blades extended across full base */}
     <instancedMesh ref={grass} args={[geometry, null, totalCount]} frustumCulled={false} receiveShadow>
-      <meshStandardMaterial side={THREE.DoubleSide} roughness={0.85} vertexColors />
+      <meshStandardMaterial side={THREE.DoubleSide} roughness={0.9} />
     </instancedMesh>
   </>
 }
