@@ -166,14 +166,16 @@ export function createWindMaterial(color, translucent = false) {
     shader.vertexShader = `uniform float uTime;\nuniform float uWind;\nvarying vec2 vPetalUv;\n${shader.vertexShader}`
       .replace('#include <beginnormal_vertex>', `
         #include <beginnormal_vertex>
-        float phaseN = uTime * 1.25 + position.y * 2.4;
-        float dzdy = uWind * 0.023 * (2.0 * position.y * sin(phaseN) + position.y * position.y * 2.4 * cos(phaseN));
+        // Spatial traveling breeze wave: sweeps from back-left to front-right
+        float spatialPhase = uTime * 1.6 - (position.x * 0.45 + position.z * 0.65) + position.y * 2.1;
+        float dzdy = uWind * 0.023 * (2.0 * position.y * sin(spatialPhase) + position.y * position.y * 2.1 * cos(spatialPhase));
         objectNormal = normalize(vec3(objectNormal.x, objectNormal.y - dzdy * objectNormal.z, objectNormal.z));
       `)
       .replace('#include <begin_vertex>', `
         #include <begin_vertex>
         vPetalUv = uv;
-        transformed.z += uWind * 0.023 * position.y * position.y * sin(uTime * 1.25 + position.y * 2.4);
+        float spatialPhase = uTime * 1.6 - (position.x * 0.45 + position.z * 0.65) + position.y * 2.1;
+        transformed.z += uWind * 0.023 * position.y * position.y * sin(spatialPhase);
       `)
     shader.fragmentShader = `varying vec2 vPetalUv;\n${shader.fragmentShader}`
       .replace('#include <color_fragment>', `
@@ -409,8 +411,10 @@ export default function FlowerModel({ colors, active, cycle, reducedMotion, dura
   useFrame(({ clock }, delta) => {
     if (active) elapsed.current += delta
     progress.current = active ? (reducedMotion ? 1 : clamp01((elapsed.current - delay) / duration)) : 0.035
-    group.current.rotation.z = reducedMotion ? 0 : Math.sin(clock.elapsedTime * 0.55 + phase) * 0.013
-    group.current.rotation.y = reducedMotion ? 0 : Math.sin(clock.elapsedTime * 0.38 + phase * 1.7) * 0.024
+    // Spatial wave breeze: phase offset by spatial position and height for natural inertia
+    const spatialTime = clock.elapsedTime * 0.55 - (plant.position[0] * 0.35 + plant.position[2] * 0.45)
+    group.current.rotation.z = reducedMotion ? 0 : Math.sin(spatialTime + phase) * 0.018
+    group.current.rotation.y = reducedMotion ? 0 : Math.sin(spatialTime * 0.7 + phase * 1.7) * 0.028
   })
   return <group position={plant.position}>
     <group ref={group}>
