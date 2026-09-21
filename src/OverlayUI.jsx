@@ -63,7 +63,7 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
         initial={{ opacity: 0, y: 22 }} animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 22 }} transition={transition}>
         <div className="message-top flex items-center justify-between"><span>{copy(ui.messageTo)}</span><SunIcon className="h-5 w-5" /></div>
         {revealed && <Typewriter lines={messages.typewriterLines} animation={animation} reducedMotion={reducedMotion} />}
-        <div className="signature">{ui.signaturePrefix}<span>{settings.senderName}</span></div>
+        <div className="signature"><span>~{settings.senderName}</span></div>
       </motion.section>)}
     </AnimatePresence>
     <footer className="footer flex items-center justify-end gap-4">
