@@ -42,18 +42,18 @@
     },
     "pageTitle": "Flores para {receiverName} · De {senderName}",
     "description": "Un pequeño jardín, un poquito de sol y unas flores amarillas para ti.",
-    "season": "El inicio de algo bonito",
+    "season": "El inicio de otro",
     "startTitle": [
       "Hay flores",
-      "que dicen",
-      "mucho."
+      "que dan inicio",
+      "a una nueva temporada."
     ],
     "openTitle": [
       "Un poquito",
       "de sol,",
       "para {receiverName}."
     ],
-    "intro": "A veces, una flor dice todo eso que las palabras no alcanzan.",
+    "intro": "",
     "invitationLabel": "Un pequeño gesto. Todo mi cariño.",
     "loading": "Preparando tu jardín...",
     "startHint": "Activa el sonido y déjate sorprender",
@@ -80,8 +80,9 @@
     "webglFallback": "Tu jardín sigue aquí, en estas palabras. Este dispositivo no puede mostrar la flor en 3D."
   },
   "audio": {
-    "filename": "flores-amarillas.mp3",
-    "volume": 0.6
+    "filename": "primavera.wav",
+    "requestedFilename": "flores-amarillas.mp3",
+    "volume": 0.5
   },
   "messages": {
     "typewriterLines": [
@@ -93,8 +94,8 @@
   },
   "interaction": { "dragSensitivity": 0.85, "maxTilt": 0.22 },
   "sun": {
-    "pulsePeriod": 4.2,
-    "pulseStrength": 0.85,
+    "pulsePeriod": 7.2,
+    "pulseStrength": 0.34,
     "desktopSize": 960,
     "mobileSize": 420,
     "desktopInset": [85, 48],
@@ -140,9 +141,7 @@
       { "position": [1.8, 0, 0.1], "height": 2.95, "headScale": 0.68, "lean": 0.2, "phase": 8.6, "facing": [0.04, -0.32, 0.16], "delay": 0.16, "detail": true },
       { "position": [-0.95, 0, 0.85], "height": 2.25, "headScale": 0.58, "lean": -0.18, "phase": 9.4, "facing": [0.16, 0.12, -0.20], "delay": 0.12, "detail": true },
       { "position": [0.70, 0, 1.10], "height": 2.10, "headScale": 0.61, "lean": 0.15, "phase": 10.2, "facing": [0.08, -0.25, 0.12], "delay": 0.10, "detail": true },
-      { "position": [0.05, 0, 0.25], "height": 4.05, "headScale": 0.86, "lean": -0.08, "phase": 0.3, "facing": [0.06, -0.12, -0.10], "delay": 0, "detail": true },
-      { "position": [-1.40, 0, 0.45], "height": 1.75, "headScale": 0.42, "lean": -0.22, "phase": 11.1, "facing": [0.20, -0.30, -0.20], "delay": 0.35, "detail": true, "isBud": true },
-      { "position": [1.35, 0, 0.65], "height": 1.60, "headScale": 0.40, "lean": 0.18, "phase": 12.4, "facing": [0.15, 0.25, 0.15], "delay": 0.45, "detail": true, "isBud": true }
+      { "position": [0.05, 0, 0.25], "height": 4.05, "headScale": 0.86, "lean": -0.08, "phase": 0.3, "facing": [0.06, -0.12, -0.10], "delay": 0, "detail": true }
     ]
   },
   "animation": {

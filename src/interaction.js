@@ -49,33 +49,84 @@ export function useParallax(enabled) {
 export function useGiftAudio(settings) {
   const ref = useRef(null)
   const [status, setStatus] = useState('paused')
+
   useEffect(() => {
-    const audio = new Audio(`/${settings.filename.replace(/^\/+/, '')}`)
+    const base = import.meta.env.BASE_URL || '/'
+    const filename = settings.filename ? settings.filename.replace(/^\/+/, '') : 'flores-amarillas.mp3'
+    const audioSrc = `${base.replace(/\/$/, '')}/${filename}`
+    
+    console.log('🎵 Cargando audio:', audioSrc)
+    const audio = new Audio(audioSrc)
     audio.preload = 'auto'
     audio.loop = true
-    audio.volume = clamp(settings.volume, 0, 1)
+    audio.volume = clamp(settings.volume ?? 0.65, 0, 1)
     ref.current = audio
-    const playing = () => setStatus('playing')
+
+    const playing = () => {
+      console.log('🎵 Audio reproduciendo con éxito')
+      setStatus('playing')
+    }
     const paused = () => setStatus('paused')
-    const failed = () => setStatus('unavailable')
+    const failed = (e) => {
+      console.warn('⚠️ Error al reproducir audio primario, intentando respaldo...', e)
+      // Fallback to primavera.wav if flores-amarillas.mp3 has any loading issue
+      if (!audio.src.includes('primavera.wav')) {
+        const fallbackSrc = `${base.replace(/\/$/, '')}/primavera.wav`
+        console.log('🎵 Intentando archivo alternativo:', fallbackSrc)
+        audio.src = fallbackSrc
+        audio.load()
+      } else {
+        setStatus('unavailable')
+      }
+    }
+
     audio.addEventListener('playing', playing)
     audio.addEventListener('pause', paused)
     audio.addEventListener('error', failed)
-    const visibility = () => { if (document.hidden) audio.pause() }
+    
+    const visibility = () => { if (document.hidden && !audio.paused) audio.pause() }
     document.addEventListener('visibilitychange', visibility)
+
     return () => {
       audio.removeEventListener('playing', playing)
       audio.removeEventListener('pause', paused)
       audio.removeEventListener('error', failed)
       document.removeEventListener('visibilitychange', visibility)
-      audio.pause(); audio.removeAttribute('src'); audio.load(); ref.current = null
+      audio.pause()
+      ref.current = null
     }
   }, [settings.filename, settings.volume])
+
   const play = useCallback(() => {
     const audio = ref.current
     if (!audio) return
-    audio.play()?.catch(error => setStatus(error.name === 'NotAllowedError' ? 'blocked' : 'unavailable'))
+    console.log('🎵 Solicitando inicio de audio...')
+    const promise = audio.play()
+    if (promise !== undefined) {
+      promise
+        .then(() => {
+          setStatus('playing')
+        })
+        .catch(error => {
+          console.warn('⚠️ Reproducción automática bloqueada por el navegador:', error.name, error.message)
+          if (error.name === 'NotAllowedError') {
+            setStatus('blocked')
+          } else {
+            setStatus('unavailable')
+          }
+        })
+    }
   }, [])
-  const toggle = useCallback(() => { if (ref.current?.paused) play(); else ref.current?.pause() }, [play])
+
+  const toggle = useCallback(() => {
+    if (!ref.current) return
+    if (ref.current.paused) {
+      play()
+    } else {
+      ref.current.pause()
+      setStatus('paused')
+    }
+  }, [play])
+
   return { status, play, toggle }
 }
