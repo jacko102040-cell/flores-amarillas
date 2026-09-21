@@ -80,9 +80,8 @@
     "webglFallback": "Tu jardín sigue aquí, en estas palabras. Este dispositivo no puede mostrar la flor en 3D."
   },
   "audio": {
-    "filename": "primavera.wav",
-    "requestedFilename": "flores-amarillas-lofi.mp3",
-    "volume": 0.5
+    "filename": "flores-amarillas.mp3",
+    "volume": 0.6
   },
   "messages": {
     "typewriterLines": [
