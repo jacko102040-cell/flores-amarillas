@@ -229,14 +229,14 @@ export function createSunflowerResources(colors) {
   return resources
 }
 
-function FlowerHead({ colors, progress, resources, detail, phase }) {
+function FlowerHead({ colors, progress, resources, detail, phase, isBud = false }) {
   const petals = useRef(), seeds = useRef(), head = useRef(), sepals = useRef(), lastProgress = useRef(-1)
   const dummy = useMemo(() => new THREE.Object3D(), [])
   const zRotation = useMemo(() => new THREE.Quaternion(), [])
   const xRotation = useMemo(() => new THREE.Quaternion(), [])
   const zAxis = useMemo(() => new THREE.Vector3(0, 0, 1), [])
   const xAxis = useMemo(() => new THREE.Vector3(1, 0, 0), [])
-  const seedCount = detail ? 987 : 377
+  const seedCount = isBud ? 120 : (detail ? 987 : 377)
 
   useLayoutEffect(() => {
     lastProgress.current = -1
@@ -265,35 +265,41 @@ function FlowerHead({ colors, progress, resources, detail, phase }) {
     }
     seeds.current.instanceMatrix.needsUpdate = true
     seeds.current.instanceColor.needsUpdate = true
-    // Green pointed involucral bracts behind the flower head.
-    for (let i = 0; i < 26; i++) {
+    // Green pointed involucral bracts behind the flower head (wrapping over if bud).
+    const sepalCount = isBud ? 32 : 26
+    for (let i = 0; i < sepalCount; i++) {
       const ring = Math.floor(i / 13), angle = (i % 13 + ring * 0.5) / 13 * TAU
-      const radius = ring ? 0.20 : 0.31
-      dummy.position.set(-Math.sin(angle) * radius, Math.cos(angle) * radius, -0.10 - ring * 0.065)
-      zRotation.setFromAxisAngle(zAxis, angle); xRotation.setFromAxisAngle(xAxis, -0.50 - ring * 0.6)
+      const radius = isBud ? (ring ? 0.12 : 0.22) : (ring ? 0.20 : 0.31)
+      const forwardAngle = isBud ? (ring ? -1.1 : -1.4) : (-0.50 - ring * 0.6)
+      dummy.position.set(-Math.sin(angle) * radius, Math.cos(angle) * radius, isBud ? (0.05 + ring * 0.04) : (-0.10 - ring * 0.065))
+      zRotation.setFromAxisAngle(zAxis, angle); xRotation.setFromAxisAngle(xAxis, forwardAngle)
       dummy.quaternion.copy(zRotation).multiply(xRotation)
-      dummy.scale.set(0.38 - ring * 0.05, 0.46 - ring * 0.09, 0.8)
+      dummy.scale.set(isBud ? 0.45 : (0.38 - ring * 0.05), isBud ? 0.65 : (0.46 - ring * 0.09), isBud ? 1.1 : 0.8)
       dummy.updateMatrix(); sepals.current.setMatrixAt(i, dummy.matrix)
     }
     sepals.current.instanceMatrix.needsUpdate = true
-  }, [colors.seedDark, colors.seedLight, seedCount, detail, phase, dummy, zRotation, xRotation, zAxis, xAxis])
+  }, [colors.seedDark, colors.seedLight, seedCount, detail, phase, dummy, zRotation, xRotation, zAxis, xAxis, isBud])
 
   useFrame(() => {
     if (lastProgress.current === progress.current) return
     lastProgress.current = progress.current
     let index = 0
+    const activeProgress = isBud ? Math.min(0.08, progress.current * 0.08) : progress.current
     RINGS.forEach((ring, ringIndex) => {
-      const opening = smooth((progress.current - ringIndex * 0.07) / (1 - ringIndex * 0.07))
+      const opening = smooth((activeProgress - ringIndex * 0.07) / (1 - ringIndex * 0.07))
       for (let i = 0; i < ring.count; i++) {
         const theta = (i + ring.offset) / ring.count * TAU + (noise(i + phase) - 0.5) * 0.065
-        const fold = THREE.MathUtils.lerp(1.36, -0.16 + ringIndex * 0.14, opening)
+        const fold = isBud ? 1.45 : THREE.MathUtils.lerp(1.36, -0.16 + ringIndex * 0.14, opening)
         zRotation.setFromAxisAngle(zAxis, theta)
-        xRotation.setFromAxisAngle(xAxis, fold + Math.sin(i * 4.2 + phase) * 0.18 * opening)
+        xRotation.setFromAxisAngle(xAxis, fold + Math.sin(i * 4.2 + phase) * 0.18 * (isBud ? 0.05 : opening))
         dummy.quaternion.copy(zRotation).multiply(xRotation)
         const radius = THREE.MathUtils.lerp(0.10, ring.radius, opening)
         dummy.position.set(-Math.sin(theta) * radius, Math.cos(theta) * radius, ring.z)
-        dummy.scale.set(0.84 + noise(i * 3 + phase) * 0.30, ring.length * (0.82 + noise(i + phase) * 0.28),
-          0.65 + noise(i * 5.7 + phase) * 0.75)
+        dummy.scale.set(
+          isBud ? 0.4 : (0.84 + noise(i * 3 + phase) * 0.30),
+          isBud ? (ring.length * 0.35) : (ring.length * (0.82 + noise(i + phase) * 0.28)),
+          isBud ? 0.3 : (0.65 + noise(i * 5.7 + phase) * 0.75)
+        )
         dummy.updateMatrix(); petals.current.setMatrixAt(index++, dummy.matrix)
       }
     })
@@ -301,11 +307,11 @@ function FlowerHead({ colors, progress, resources, detail, phase }) {
     head.current.scale.setScalar(THREE.MathUtils.lerp(0.67, 1, smooth(progress.current)))
   })
   return <group ref={head} dispose={null}>
-    <instancedMesh ref={petals} args={[detail ? resources.petals : resources.distantPetals, resources.wind.material, PETAL_COUNT]} frustumCulled={false} />
+    <instancedMesh ref={petals} args={[detail ? resources.petals : resources.distantPetals, resources.wind.material, PETAL_COUNT]} frustumCulled={false} castShadow />
     <mesh geometry={resources.disc} material={resources.discMaterial} position={[0, 0, 0.15]} scale={[0.47, 0.47, 0.17]} />
     <instancedMesh ref={seeds} args={[detail ? resources.floret : resources.seed, detail ? resources.floretMaterial : resources.seedMaterial, seedCount]} frustumCulled={false} />
     <mesh geometry={resources.disc} material={resources.receptacleMaterial} position={[0, 0, -0.07]} scale={[0.43, 0.43, 0.22]} />
-    <instancedMesh ref={sepals} args={[resources.leaf, resources.leafMaterial, 26]} frustumCulled={false} />
+    <instancedMesh ref={sepals} args={[resources.leaf, resources.leafMaterial, isBud ? 32 : 26]} frustumCulled={false} />
   </group>
 }
 
@@ -316,9 +322,55 @@ function Leaf({ resources, position, rotation, scale, detail }) {
   </group>
 }
 
+export function FallenPetals({ resources }) {
+  const meshRef = useRef()
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const count = 16
+
+  useLayoutEffect(() => {
+    if (!meshRef.current) return
+    const tint = new THREE.Color()
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * TAU + noise(i * 12.3) * 0.8
+      const dist = 0.4 + (i % 5) * 0.45 + noise(i * 7.1) * 0.3
+      const x = Math.cos(angle) * dist
+      const z = Math.sin(angle) * dist - 0.4
+      const y = -0.095 + noise(i * 3.7) * 0.015
+      
+      dummy.position.set(x, y, z)
+      dummy.rotation.set(
+        Math.PI / 2 + (noise(i * 2.1) - 0.5) * 0.2,
+        (noise(i * 5.5) - 0.5) * 0.3,
+        angle + (noise(i * 9.2) - 0.5) * 1.5
+      )
+      const size = 0.7 + noise(i * 4.4) * 0.5
+      dummy.scale.set(size * 0.8, size, size * 0.5)
+      dummy.updateMatrix()
+      meshRef.current.setMatrixAt(i, dummy.matrix)
+
+      tint.setRGB(1, 0.85 + noise(i * 2.9) * 0.15, 0.25 + noise(i * 4.1) * 0.35)
+      meshRef.current.setColorAt(i, tint)
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true
+    meshRef.current.instanceColor.needsUpdate = true
+  }, [dummy])
+
+  return (
+    <instancedMesh ref={meshRef} args={[resources.petals, resources.wind.material, count]} frustumCulled={false} castShadow />
+  )
+}
+
 export default function FlowerModel({ colors, active, cycle, reducedMotion, duration, plant, resources, detail }) {
   const group = useRef(), progress = useRef(0), elapsed = useRef(0)
-  const { height, lean, phase, headScale, delay, facing } = plant
+  const { height, lean, phase, headScale, delay, facing, isBud = false } = plant
+  
+  // Per-plant head tilt variation so no two sunflowers face identically
+  const customFacing = useMemo(() => [
+    facing[0] + (noise(phase * 1.3) - 0.5) * 0.22,
+    facing[1] + (noise(phase * 2.7) - 0.5) * 0.28,
+    facing[2] + (noise(phase * 3.9) - 0.5) * 0.18,
+  ], [facing, phase])
+
   const curve = useMemo(() => new THREE.CatmullRomCurve3([
     new THREE.Vector3(0, 0, 0), new THREE.Vector3(lean * 0.12 + Math.sin(phase) * 0.06, height * 0.32, 0.06),
     new THREE.Vector3(lean * 0.68 - Math.sin(phase) * 0.04, height * 0.73, -0.06), new THREE.Vector3(lean, height, -0.18 * headScale),
@@ -333,7 +385,7 @@ export default function FlowerModel({ colors, active, cycle, reducedMotion, dura
       scale: (0.99 - t * 0.53) * (0.88 + noise(phase + index) * 0.2) }
   }), [curve, phase])
   const stem = useMemo(() => {
-    const geometry = new THREE.TubeGeometry(curve, 28, 0.045, 7, false)
+    const geometry = new THREE.TubeGeometry(curve, 28, isBud ? 0.032 : 0.045, 7, false)
     const positions = geometry.attributes.position
     for (let row = 0; row <= 28; row++) {
       const point = curve.getPointAt(row / 28), taper = 1.25 - row / 28 * 0.59
@@ -351,7 +403,7 @@ export default function FlowerModel({ colors, active, cycle, reducedMotion, dura
     const joined = mergeGeometries(parts)
     parts.forEach(part => part.dispose())
     return joined
-  }, [curve, leaves])
+  }, [curve, leaves, isBud])
   useEffect(() => () => stem.dispose(), [stem])
   useEffect(() => { elapsed.current = 0; progress.current = 0 }, [active, cycle])
   useFrame(({ clock }, delta) => {
@@ -364,8 +416,8 @@ export default function FlowerModel({ colors, active, cycle, reducedMotion, dura
     <group ref={group}>
       <mesh geometry={stem} material={resources.stemMaterial} dispose={null} castShadow receiveShadow />
       {leaves.map((leaf, i) => <Leaf key={i} {...leaf} resources={resources} detail={detail} />)}
-      <group position={[lean, height, 0]} rotation={[facing[0], facing[1], facing[2]]} scale={headScale}>
-        <FlowerHead colors={colors} progress={progress} resources={resources} detail={detail} phase={phase} />
+      <group position={[lean, height, 0]} rotation={[customFacing[0], customFacing[1], customFacing[2]]} scale={isBud ? headScale * 0.5 : headScale}>
+        <FlowerHead colors={colors} progress={progress} resources={resources} detail={detail} phase={phase} isBud={isBud} />
       </group>
     </group>
   </group>

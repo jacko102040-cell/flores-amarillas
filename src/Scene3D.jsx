@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { ContactShadows, Environment, Lightformer, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
-import FlowerModel, { createSunflowerResources } from './FlowerModel'
+import FlowerModel, { createSunflowerResources, FallenPetals } from './FlowerModel'
 import SunModel from './SunModel'
 import CompanionFlowers from './CompanionFlowers'
 
@@ -101,6 +101,7 @@ function Garden({ config, active, cycle, input, reducedMotion, onReady, rotation
       <group ref={turntable} position={[0, 2, 0]}><group position={[0, -2, 0]}>
       <GardenFloor colors={config.ui.colors} count={mobile ? config.garden.mobileGrassCount : config.garden.grassCount} />
       <ContactShadows position={[0, -0.10, -0.2]} opacity={0.65} scale={6.5} blur={2.0} far={3.0} resolution={512} color="#1b2b10" />
+      <FallenPetals resources={resources} />
       {config.garden.plants.map((plant, index) => <FlowerModel key={index} plant={plant} resources={resources}
         detail={plant.detail && (!mobile || index === config.garden.plants.length - 1)}
         colors={config.ui.colors} active={active} cycle={cycle} reducedMotion={reducedMotion} duration={config.animation.bloomDuration} />)}
