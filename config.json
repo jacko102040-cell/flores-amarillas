@@ -1,0 +1,153 @@
+{
+  "settings": {
+    "receiverName": "Nicol",
+    "senderName": "Jairo",
+    "date": "21 de Septiembre",
+    "language": "es"
+  },
+  "ui": {
+    "tapToStartText": "Toca para descubrir la primavera...",
+    "colors": {
+      "primaryYellow": "#FFD700",
+      "glowYellow": "#FFA500",
+      "backgroundDark": "#0A0A0A",
+      "backgroundSpring": "#1A1A1A",
+      "springLight": "#fff5cc",
+      "springMist": "#ece8cf",
+      "springEdge": "#dce2cb",
+      "textLight": "#f4f1df",
+      "textMuted": "#989b88",
+      "textDark": "#343c28",
+      "mutedDark": "#667055",
+      "accentDark": "#88702b",
+      "leaf": "#718e47",
+      "leafDark": "#344a26",
+      "leafVein": "#9bac5b",
+      "ground": "#414f31",
+      "seedLight": "#c1973b",
+      "seedDark": "#4b2e13",
+      "sunlight": "#fff2cb",
+      "sunCore": "#fffef3",
+      "sunEdge": "#ffcb72",
+      "sunHalo": "#ffe0a0",
+      "ambient": "#e3edcb",
+      "pollen": "#e3bd57",
+      "companionWhite": "#fffefa",
+      "companionGold": "#f8c52d",
+      "companionCenter": "#dba621",
+      "lilyPetal": "#fff6ec",
+      "lilyThroat": "#bdca76",
+      "lilyBlush": "#e8aaa3",
+      "lilyPollen": "#a55024"
+    },
+    "pageTitle": "Flores para {receiverName} · De {senderName}",
+    "description": "Un pequeño jardín, un poquito de sol y unas flores amarillas para ti.",
+    "season": "El inicio de algo bonito",
+    "startTitle": [
+      "Hay flores",
+      "que dicen",
+      "mucho."
+    ],
+    "openTitle": [
+      "Un poquito",
+      "de sol,",
+      "para {receiverName}."
+    ],
+    "intro": "A veces, una flor dice todo eso que las palabras no alcanzan.",
+    "invitationLabel": "Un pequeño gesto. Todo mi cariño.",
+    "loading": "Preparando tu jardín...",
+    "startHint": "Activa el sonido y déjate sorprender",
+    "flowerCaption": "Lo bonito está por florecer",
+    "flowerCaptionOpen": "Que florezca lo que nos hace bien",
+    "messageLabel": "Una dedicatoria para ti",
+    "messageTo": "Para ti, {receiverName}",
+    "signaturePrefix": "Con cariño,",
+    "senderNote": "De {senderName}, para ti.",
+    "replay": "Otra vez",
+    "rotateHint": "Arrastra para explorar el jardín",
+    "rotateLabel": "Girar el jardín: arrastra, usa las flechas o pulsa Inicio para centrar",
+    "resetView": "Centrar vista",
+    "resetViewLabel": "Volver a la vista frontal del jardín",
+    "replayLabel": "Volver a florecer y leer la dedicatoria",
+    "playAudio": "Reproducir música",
+    "pauseAudio": "Pausar música",
+    "audioStates": {
+      "playing": "Sonando",
+      "paused": "En silencio",
+      "blocked": "Activar sonido",
+      "unavailable": "Audio no disponible"
+    },
+    "webglFallback": "Tu jardín sigue aquí, en estas palabras. Este dispositivo no puede mostrar la flor en 3D."
+  },
+  "audio": {
+    "filename": "primavera.wav",
+    "requestedFilename": "flores-amarillas-lofi.mp3",
+    "volume": 0.5
+  },
+  "messages": {
+    "typewriterLines": [
+      "Dicen que si te regalan flores amarillas...",
+      "es porque quieren que te quedes en su vida para siempre.",
+      "Feliz día de la primavera.",
+      "Gracias por iluminar mis días."
+    ]
+  },
+  "interaction": { "dragSensitivity": 0.85, "maxTilt": 0.22 },
+  "sun": {
+    "pulsePeriod": 4.2,
+    "pulseStrength": 0.85,
+    "desktopSize": 960,
+    "mobileSize": 420,
+    "desktopInset": [85, 48],
+    "mobileInset": [18, -10],
+    "lightIntensity": 0.72,
+    "rayStrength": 1.05,
+    "rayLength": 1.65,
+    "beamStrength": 0.5,
+    "flareStrength": 0.35,
+    "lightPosition": [6, 5, 3]
+  },
+  "garden": {
+    "desktopPosition": [1.65, -2.25, 0],
+    "mobilePosition": [0, -1.15, 0],
+    "desktopScale": 0.88,
+    "mobileScale": 0.5,
+    "grassCount": 240,
+    "mobileGrassCount": 130,
+    "companions": [
+      { "kind": "daisy", "color": "companionWhite", "position": [-2.10, 0, 0.30], "height": 2.12, "headScale": 0.33, "lean": -0.12, "facing": [0.05, -0.20, -0.18], "delay": 0.24 },
+      { "kind": "daisy", "color": "companionGold", "position": [-2.30, 0, -0.20], "height": 1.55, "headScale": 0.30, "lean": -0.13, "facing": [0.14, 0.10, 0.24], "delay": 0.36 },
+      { "kind": "daisy", "color": "companionWhite", "position": [-1.65, 0, 1.25], "height": 1.22, "headScale": 0.35, "lean": -0.10, "facing": [0.16, 0.10, -0.20], "delay": 0.32 },
+      { "kind": "daisy", "color": "companionWhite", "position": [-1.02, 0, 1.18], "height": 1.10, "headScale": 0.29, "lean": -0.08, "facing": [-0.08, -0.15, 0.16], "delay": 0.44 },
+      { "kind": "daisy", "color": "companionGold", "position": [-0.40, 0, 1.25], "height": 1.12, "headScale": 0.30, "lean": 0.06, "facing": [0.12, 0.22, -0.18], "delay": 0.28 },
+      { "kind": "daisy", "color": "companionWhite", "position": [0.32, 0, 1.27], "height": 0.88, "headScale": 0.30, "lean": 0.06, "facing": [0.15, -0.13, 0.22], "delay": 0.38 },
+      { "kind": "daisy", "color": "companionWhite", "position": [1.04, 0, 1.15], "height": 1.10, "headScale": 0.33, "lean": 0.10, "facing": [0.08, 0.18, -0.12], "delay": 0.48 },
+      { "kind": "daisy", "color": "companionGold", "position": [1.60, 0, 0.90], "height": 1.40, "headScale": 0.30, "lean": 0.12, "facing": [0.10, -0.15, 0.18], "delay": 0.32 },
+      { "kind": "daisy", "color": "companionWhite", "position": [2.20, 0, 0.35], "height": 2.08, "headScale": 0.34, "lean": 0.10, "facing": [0.04, 0.20, 0.14], "delay": 0.26 },
+      { "kind": "daisy", "color": "companionWhite", "position": [-2.12, 0, 0.22], "height": 2.58, "headScale": 0.27, "lean": -0.22, "facing": [0.02, -0.20, 0.08], "delay": 0.50 },
+      { "kind": "lily", "position": [-1.98, 0, 0.72], "height": 1.88, "headScale": 0.32, "lean": -0.17, "facing": [-0.06, -0.15, -0.24], "delay": 0.42 },
+      { "kind": "lily", "position": [-0.55, 0, 1.20], "height": 1.55, "headScale": 0.31, "lean": -0.04, "facing": [0.12, 0.22, 0.16], "delay": 0.54 },
+      { "kind": "lily", "position": [1.90, 0, 0.75], "height": 1.86, "headScale": 0.32, "lean": 0.12, "facing": [-0.10, -0.12, -0.08], "delay": 0.46 },
+      { "kind": "lily", "position": [1.75, 0, 0.60], "height": 0.92, "headScale": 0.28, "lean": 0.12, "facing": [0.05, 0.26, 0.12], "delay": 0.60 }
+    ],
+    "plants": [
+      { "position": [-1.6, 0, -1.9], "height": 4.15, "headScale": 0.56, "lean": -0.16, "phase": 1.4, "facing": [0.08, -0.32, -0.16], "delay": 0.40, "detail": false },
+      { "position": [-0.65, 0, -2.7], "height": 4.7, "headScale": 0.52, "lean": 0.16, "phase": 2.5, "facing": [-0.10, 0.32, 0.16], "delay": 0.64, "detail": false },
+      { "position": [0.65, 0, -2.2], "height": 4.5, "headScale": 0.58, "lean": 0.22, "phase": 3.2, "facing": [0.13, -0.20, 0.10], "delay": 0.54, "detail": false },
+      { "position": [1.7, 0, -1.65], "height": 3.9, "headScale": 0.61, "lean": 0.20, "phase": 4.5, "facing": [-0.09, 0.42, 0.24], "delay": 0.42, "detail": false },
+      { "position": [-2.0, 0, -0.4], "height": 3.0, "headScale": 0.58, "lean": -0.28, "phase": 5.2, "facing": [0.12, -0.35, -0.24], "delay": 0.24, "detail": false },
+      { "position": [-0.95, 0, -0.5], "height": 3.65, "headScale": 0.65, "lean": -0.12, "phase": 6.7, "facing": [0.02, -0.25, -0.12], "delay": 0.18, "detail": true },
+      { "position": [0.50, 0, -0.5], "height": 3.15, "headScale": 0.70, "lean": 0.11, "phase": 7.3, "facing": [0.10, 0.25, 0.18], "delay": 0.28, "detail": false },
+      { "position": [1.8, 0, 0.1], "height": 2.95, "headScale": 0.68, "lean": 0.2, "phase": 8.6, "facing": [0.04, -0.32, 0.16], "delay": 0.16, "detail": true },
+      { "position": [-0.95, 0, 0.85], "height": 2.25, "headScale": 0.58, "lean": -0.18, "phase": 9.4, "facing": [0.16, 0.12, -0.20], "delay": 0.12, "detail": true },
+      { "position": [0.70, 0, 1.10], "height": 2.10, "headScale": 0.61, "lean": 0.15, "phase": 10.2, "facing": [0.08, -0.25, 0.12], "delay": 0.10, "detail": true },
+      { "position": [0.05, 0, 0.25], "height": 4.05, "headScale": 0.86, "lean": -0.08, "phase": 0.3, "facing": [0.06, -0.12, -0.10], "delay": 0, "detail": true }
+    ]
+  },
+  "animation": {
+    "bloomDuration": 3.6,
+    "characterDelay": 40,
+    "punctuationPause": 250,
+    "linePause": 850
+  }
+}

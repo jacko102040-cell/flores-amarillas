@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "receiverName": "Nicol", 
+    "senderName": "Jairo",
+    "date": "21 de Septiembre"
+  },
+  "ui": {
+    "tapToStartText": "Toca para descubrir la primavera...",
+    "colors": {
+      "primaryYellow": "#FFD700",
+      "glowYellow": "#FFA500",
+      "backgroundDark": "#0A0A0A",
+      "backgroundSpring": "#1A1A1A"
+    }
+  },
+  "audio": {
+    "filename": "flores-amarillas-lofi.mp3",
+    "volume": 0.5
+  },
+  "messages": {
+    "typewriterLines": [
+      "Dicen que si te regalan flores amarillas...",
+      "es porque quieren que te quedes en su vida para siempre.",
+      "Feliz día de la primavera.",
+      "Gracias por iluminar mis días."
+    ]
+  }
+}
