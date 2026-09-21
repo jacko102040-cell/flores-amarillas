@@ -59,7 +59,7 @@ export function useGiftAudio(settings) {
     const audio = new Audio(audioSrc)
     audio.preload = 'auto'
     audio.loop = true
-    audio.volume = clamp(settings.volume ?? 0.65, 0, 1)
+    audio.volume = clamp(settings.volume ?? 0.30, 0, 1)
     ref.current = audio
 
     const playing = () => {

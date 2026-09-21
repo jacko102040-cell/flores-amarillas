@@ -42,7 +42,7 @@
     },
     "pageTitle": "Flores para {receiverName} · De {senderName}",
     "description": "Un pequeño jardín, un poquito de sol y unas flores amarillas para ti.",
-    "season": "El inicio de otro",
+    "season": "El inicio de otro capitulo del año",
     "startTitle": [
       "Hay flores",
       "que dan inicio",
@@ -80,16 +80,16 @@
     "webglFallback": "Tu jardín sigue aquí, en estas palabras. Este dispositivo no puede mostrar la flor en 3D."
   },
   "audio": {
-    "filename": "primavera.wav",
+    "filename": "flores-amarillas.mp3",
     "requestedFilename": "flores-amarillas.mp3",
-    "volume": 0.5
+    "volume": 0.30
   },
   "messages": {
     "typewriterLines": [
       "Dicen que si te regalan flores amarillas...",
-      "es porque quieren que te quedes en su vida para siempre.",
+      "es una forma de desearte que todo lo bueno florezca para ti.",
       "Feliz día de la primavera.",
-      "Gracias por iluminar mis días."
+      "Gracias por las risas y los buenos momentos."
     ]
   },
   "interaction": { "dragSensitivity": 0.85, "maxTilt": 0.22 },
