@@ -124,9 +124,7 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
           </AnimatePresence>
         )}
       </div>
-      <div className="footer-right pointer-events-auto">
-        {!entered && <span className="sender-note">{copy(ui.senderNote)}</span>}
-      </div>
+      <div className="footer-right pointer-events-auto" />
     </footer>
   </div>
 }

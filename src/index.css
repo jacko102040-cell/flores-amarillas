@@ -37,12 +37,26 @@ h1 > span { display: block; }
 .caption-line { display: inline-block; height: 58px; width: 1px; background: currentColor; opacity: .35; }
 .is-open .flower-caption { color: var(--mutedDark); }
 .invitation { position: absolute; left: 9%; bottom: 15%; width: 335px; }
-.invitation-label { color: var(--textMuted); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; margin: 0 0 14px 2px; }
+.invitation-label {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin: 0 0 14px 2px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75), 0 0 14px rgba(255, 255, 255, 0.4);
+}
 .start-button { border: 1px solid color-mix(in srgb, var(--primaryYellow) 33%, transparent); background: linear-gradient(120deg, color-mix(in srgb, var(--primaryYellow) 9%, transparent), color-mix(in srgb, var(--textLight) 3%, transparent)); color: var(--textLight); border-radius: 12px; padding: 14px 17px 14px 22px; backdrop-filter: blur(18px); box-shadow: 0 8px 40px #00000015, inset 0 1px 0 #ffffff09; transition: border-color .3s, transform .3s, background .3s; }
 .start-button:hover { border-color: var(--primaryYellow); transform: translateY(-2px); }
 .start-button > span:first-child { text-align: left; font-size: 14px; line-height: 1.6; max-width: 215px; }
 .button-sun { color: var(--primaryYellow); }
-.start-hint { text-align: center; font-size: 11px; color: var(--textMuted); margin: 14px 0 0; }
+.start-hint {
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+  margin: 14px 0 0;
+}
 .message-card {
   position: absolute;
   left: 9%;
