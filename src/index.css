@@ -31,8 +31,14 @@ h1 > span { display: block; }
 .scene-shell { position: absolute; inset: 0; z-index: 1; touch-action: pan-y; }
 .garden-controls { position: absolute; z-index: 2; left: 36%; right: 5%; top: 12%; bottom: 13%; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
 .garden-controls:active { cursor: grabbing; }
-.garden-controls:focus-visible { outline: 1px solid var(--accentDark); outline-offset: -4px; border-radius: 24px; }
-.garden-gesture-hint { position: absolute; top: 0; left: 0; right: 0; text-align: center; font-size: 10px; letter-spacing: .08em; color: var(--mutedDark); pointer-events: none; }
+.garden-gesture-hint {
+  font-size: 11px;
+  letter-spacing: .09em;
+  color: var(--mutedDark);
+  pointer-events: none;
+  margin-top: 16px;
+  display: block;
+}
 .flower-caption { position: absolute; right: 6%; top: 58%; display: flex; flex-direction: column; gap: 18px; align-items: center; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; writing-mode: vertical-rl; color: var(--textMuted); }
 .caption-line { display: inline-block; height: 58px; width: 1px; background: currentColor; opacity: .35; }
 .is-open .flower-caption { color: var(--mutedDark); }
@@ -166,8 +172,8 @@ h1 > span { display: block; }
 @media (min-width: 1000px) and (max-height: 850px) { .gift { min-height: 740px; } .hero { top: 10%; } .hero h1 { font-size: 82px; } .hero-open { top: 9%; } .hero-open h1 { font-size: 64px; } .message-card { bottom: 12%; } .invitation { bottom: 13%; } .intro { margin-top: 18px; } }
 @media (min-width: 1000px) and (max-width: 1100px) { .hero, .invitation, .message-card { left: 6%; } .hero { width: 340px; } .hero h1 { font-size: 78px; } .hero-open h1 { font-size: 62px; } .message-card { width: 310px; } }
 @media (max-width: 999px) {
-  .garden-controls { left: 3%; right: 3%; top: 24%; bottom: 38%; }
-  .garden-gesture-hint { top: -9px; font-size: 9px; }
+  .garden-controls { left: 3%; right: 3%; top: 24%; bottom: 36%; }
+  .garden-gesture-hint { font-size: 10px; letter-spacing: .08em; margin-top: 14px; text-shadow: 0 1px 4px rgba(255, 255, 255, 0.7); }
   .gift { min-height: 820px; height: 100svh; }
   .hero, .hero-open { top: max(32px, env(safe-area-inset-top)); width: 88%; left: 6%; text-align: center; }
   .eyebrow { justify-content: center; font-size: 9.5px; letter-spacing: .08em; margin-bottom: 12px; gap: 8px; }

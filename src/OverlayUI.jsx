@@ -51,6 +51,9 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
         {(entered ? ui.openTitle : ui.startTitle).map((line, i) => <span key={i} className={i === 2 ? 'title-accent' : ''}>{copy(line)}</span>)}
       </motion.h1></AnimatePresence>
       {!entered && <motion.p className="intro" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ ...transition, delay: 0.4 }}>{copy(ui.intro)}</motion.p>}
+      {entered && <motion.p id="garden-gesture-hint" className="garden-gesture-hint" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.4 }}>
+        {copy(ui.rotateHint)}
+      </motion.p>}
     </div>
     {!exploreMode && <div className="flower-caption" aria-hidden="true"><span className="caption-line" /><span>{entered ? ui.flowerCaptionOpen : ui.flowerCaption}</span></div>}
     <AnimatePresence mode="wait">

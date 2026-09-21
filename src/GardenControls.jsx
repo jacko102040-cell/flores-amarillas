@@ -99,9 +99,5 @@ export default function GardenControls({ rotation, config, active, cycle, explor
       if (event.key === 'ArrowDown') rotation.current.pitch = Math.min(config.interaction.maxTilt, rotation.current.pitch + 0.06)
       if (event.key === '+' || event.key === '=') rotation.current.zoom = Math.min(1.85, (rotation.current.zoom ?? 1) + 0.1)
       if (event.key === '-') rotation.current.zoom = Math.max(0.55, (rotation.current.zoom ?? 1) - 0.1)
-    }}>
-    <span id="garden-gesture-hint" className="garden-gesture-hint">
-      {exploreMode ? "Arrastra para girar · Pellizca o rueda para acercar" : config.ui.rotateHint}
-    </span>
-  </div>
+    }} />
 }
