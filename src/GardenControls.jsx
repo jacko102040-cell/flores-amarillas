@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 /** A dedicated hit area leaves scrolling and the dedication independent.
  * Pointer capture keeps a drag alive when a finger crosses its boundary.
  * Supports multi-touch pinch-to-zoom and mouse wheel zoom. */
-export default function GardenControls({ rotation, config, active, cycle, exploreMode }) {
+export default function GardenControls({ rotation, config, active, cycle, exploreMode, onInteract }) {
   const activePointers = useRef(new Map())
   const initialPinchDist = useRef(null)
   const initialZoom = useRef(1)
@@ -43,15 +43,23 @@ export default function GardenControls({ rotation, config, active, cycle, explor
     if (activePointers.current.size === 2 && initialPinchDist.current) {
       const currentDist = getPinchDistance()
       if (currentDist && initialPinchDist.current > 0) {
+        if (Math.abs(currentDist - initialPinchDist.current) > 3) {
+          onInteract?.()
+        }
         const scaleFactor = currentDist / initialPinchDist.current
         const newZoom = Math.max(0.55, Math.min(1.85, initialZoom.current * scaleFactor))
         rotation.current.zoom = newZoom
       }
     } else if (activePointers.current.size === 1) {
+      const dx = event.clientX - prev.x
+      const dy = event.clientY - prev.y
+      if (Math.hypot(dx, dy) > 2) {
+        onInteract?.()
+      }
       const bounds = surface.current ? surface.current.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight }
-      rotation.current.yaw += (event.clientX - prev.x) / bounds.width * Math.PI * 2 * config.interaction.dragSensitivity
+      rotation.current.yaw += dx / bounds.width * Math.PI * 2 * config.interaction.dragSensitivity
       rotation.current.pitch = Math.max(-config.interaction.maxTilt, Math.min(config.interaction.maxTilt,
-        rotation.current.pitch + (event.clientY - prev.y) / bounds.height * 0.65))
+        rotation.current.pitch + dy / bounds.height * 0.65))
     }
   }
 
@@ -70,6 +78,7 @@ export default function GardenControls({ rotation, config, active, cycle, explor
 
   function handleWheel(event) {
     event.preventDefault()
+    onInteract?.()
     const delta = event.deltaY * -0.0015
     const currentZoom = rotation.current.zoom ?? 1
     rotation.current.zoom = Math.max(0.55, Math.min(1.85, currentZoom + delta))
@@ -86,8 +95,9 @@ export default function GardenControls({ rotation, config, active, cycle, explor
     onWheel={handleWheel}
     onBlur={() => { activePointers.current.clear(); rotation.current.dragging = false }}
     onKeyDown={event => {
-      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', '+', '-'].includes(event.key)) return
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', '+', '-', '='].includes(event.key)) return
       event.preventDefault()
+      onInteract?.()
       if (event.key === 'Home') {
         rotation.current.yaw = Math.round(rotation.current.yaw / (Math.PI * 2)) * Math.PI * 2
         rotation.current.pitch = 0

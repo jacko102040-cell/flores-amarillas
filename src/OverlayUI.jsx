@@ -30,7 +30,7 @@ function Typewriter({ lines, animation, reducedMotion }) {
   </>
 }
 
-export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, audio, exploreMode, onToggleExplore, onStart, onReplay, onResetView }) {
+export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, audio, exploreMode, hasInteracted, onToggleExplore, onStart, onReplay, onResetView }) {
   const { ui, settings, messages, animation } = config
   const entered = stage !== 'sealed', revealed = stage === 'revealed'
   const copy = text => fill(text, settings)
@@ -51,9 +51,15 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
         {(entered ? ui.openTitle : ui.startTitle).map((line, i) => <span key={i} className={i === 2 ? 'title-accent' : ''}>{copy(line)}</span>)}
       </motion.h1></AnimatePresence>
       {!entered && <motion.p className="intro" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ ...transition, delay: 0.4 }}>{copy(ui.intro)}</motion.p>}
-      {entered && <motion.p id="garden-gesture-hint" className="garden-gesture-hint" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.4 }}>
-        {copy(ui.rotateHint)}
-      </motion.p>}
+      <AnimatePresence>
+        {entered && !hasInteracted && <motion.p id="garden-gesture-hint" className="garden-gesture-hint"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6, transition: { duration: 0.45, ease: 'easeOut' } }}
+          transition={{ ...transition, delay: 0.4 }}>
+          {copy(ui.rotateHint)}
+        </motion.p>}
+      </AnimatePresence>
     </div>
     {!exploreMode && <div className="flower-caption" aria-hidden="true"><span className="caption-line" /><span>{entered ? ui.flowerCaptionOpen : ui.flowerCaption}</span></div>}
     <AnimatePresence mode="wait">

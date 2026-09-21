@@ -19,6 +19,7 @@ export default function App() {
   const [cycle, setCycle] = useState(0)
   const [sceneReady, setSceneReady] = useState(false)
   const [exploreMode, setExploreMode] = useState(false)
+  const [hasInteracted, setHasInteracted] = useState(false)
   const reducedMotion = useReducedMotion()
   const { input, requestOrientation } = useParallax(!reducedMotion)
   const audio = useGiftAudio(config.audio)
@@ -26,6 +27,7 @@ export default function App() {
   const startLock = useRef(false)
   const rotation = useRef({ yaw: 0, pitch: 0, zoom: 1, dragging: false })
   const onReady = useCallback(() => setSceneReady(true), [])
+  const onInteract = useCallback(() => setHasInteracted(true), [])
 
   useEffect(() => {
     document.title = fill(config.ui.pageTitle, config.settings)
@@ -46,7 +48,7 @@ export default function App() {
     requestOrientation()
     setStage('blooming')
   }
-  function replay() { setCycle(value => value + 1); setStage('blooming') }
+  function replay() { setCycle(value => value + 1); setStage('blooming'); setHasInteracted(false) }
   const cssVars = Object.fromEntries(Object.entries(config.ui.colors).map(([key, value]) => [`--${key}`, value]))
   const fallback = <div className="scene-fallback" role="status">{config.ui.webglFallback}</div>
   return (
@@ -59,9 +61,10 @@ export default function App() {
             reducedMotion={!!reducedMotion} onReady={onReady} onFailure={onReady} fallback={fallback} /></Suspense>
         </SceneBoundary>
       </div>
-      <GardenControls rotation={rotation} config={config} active={entered && sceneReady} cycle={cycle} exploreMode={exploreMode} />
+      <GardenControls rotation={rotation} config={config} active={entered && sceneReady} cycle={cycle} exploreMode={exploreMode} onInteract={onInteract} />
       <OverlayUI config={config} stage={stage} cycle={cycle} ready={sceneReady} reducedMotion={!!reducedMotion}
         exploreMode={exploreMode}
+        hasInteracted={hasInteracted}
         onToggleExplore={() => setExploreMode(prev => !prev)}
         onResetView={() => {
           rotation.current.yaw = Math.round(rotation.current.yaw / (Math.PI * 2)) * Math.PI * 2
