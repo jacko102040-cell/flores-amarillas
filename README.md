@@ -1,4 +1,5 @@
-# Flores amarillas · Para Nicol, de Jairo
+# Flores amarillas ·
+
 
 Una dedicatoria interactiva: once girasoles protagonistas, acompañados por diez margaritas blancas y amarillas y cuatro lirios, luz de primavera, polen suspendido y cuatro mensajes que aparecen letra a letra.
 
