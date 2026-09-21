@@ -17,17 +17,17 @@ button:disabled { cursor: wait; opacity: .6; }
 .spring-wash::after { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 3.4s ease; background: radial-gradient(ellipse at 64% 38%, var(--springLight) 0%, var(--springMist) 55%, var(--springEdge) 100%); }
 .is-open .spring-wash::after { opacity: 1; }
 .grain { pointer-events: none; position: absolute; inset: 0; z-index: 5; opacity: .035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.83' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath filter='url(%23n)' opacity='.5' d='M0 0h180v180H0z'/%3E%3C/svg%3E"); }
-.hero { position: absolute; top: 20%; left: 9%; width: 410px; }
-.eyebrow { display: flex; align-items: center; gap: 12px; text-transform: uppercase; font-size: 11px; letter-spacing: .15em; color: var(--textMuted); margin: 0 0 27px; }
-.eyebrow span { width: 24px; height: 1px; background: currentColor; opacity: .45; }
+.hero { position: absolute; top: 12%; left: 9%; width: 440px; }
+.eyebrow { display: flex; align-items: center; gap: 12px; text-transform: uppercase; font-size: 11px; letter-spacing: .16em; color: rgba(255, 255, 255, 0.82); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); margin: 0 0 18px; }
+.eyebrow span { width: 24px; height: 1px; background: currentColor; opacity: .55; }
 h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; font-size: clamp(64px, 6.9vw, 108px); line-height: .99; letter-spacing: -.045em; margin: 0; }
 h1 > span { display: block; }
 .title-accent { font-style: italic; color: var(--primaryYellow); }
 .is-open .title-accent { color: var(--accentDark); }
-.intro { font-size: 16px; line-height: 1.8; color: var(--textMuted); max-width: 285px; margin-top: 28px; }
-.hero-open { top: 17%; }
+.intro { font-size: 16px; line-height: 1.8; color: var(--textMuted); max-width: 295px; margin-top: 22px; }
+.hero-open { top: 10%; }
 .hero-open h1 { font-size: clamp(58px, 5.7vw, 86px); }
-.is-open .eyebrow { color: var(--mutedDark); }
+.is-open .eyebrow { color: var(--mutedDark); text-shadow: none; }
 .scene-shell { position: absolute; inset: 0; z-index: 1; touch-action: pan-y; }
 .garden-controls { position: absolute; z-index: 2; left: 36%; right: 5%; top: 12%; bottom: 13%; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
 .garden-controls:active { cursor: grabbing; }
@@ -163,14 +163,14 @@ h1 > span { display: block; }
 .scene-fallback { position: absolute; top: 45%; right: 10%; width: 250px; padding: 30px; font-family: Georgia, serif; font-size: 21px; line-height: 1.5; text-align: center; opacity: .7; }
 @keyframes blink { 50% { opacity: 0; } }
 @keyframes equalize { to { height: 16px; } }
-@media (min-width: 1000px) and (max-height: 850px) { .gift { min-height: 740px; } .hero { top: 18%; } .hero h1 { font-size: 84px; } .hero-open h1 { font-size: 64px; } .message-card { bottom: 12%; } .invitation { bottom: 13%; } .intro { margin-top: 20px; } }
+@media (min-width: 1000px) and (max-height: 850px) { .gift { min-height: 740px; } .hero { top: 10%; } .hero h1 { font-size: 82px; } .hero-open { top: 9%; } .hero-open h1 { font-size: 64px; } .message-card { bottom: 12%; } .invitation { bottom: 13%; } .intro { margin-top: 18px; } }
 @media (min-width: 1000px) and (max-width: 1100px) { .hero, .invitation, .message-card { left: 6%; } .hero { width: 340px; } .hero h1 { font-size: 78px; } .hero-open h1 { font-size: 62px; } .message-card { width: 310px; } }
 @media (max-width: 999px) {
   .garden-controls { left: 3%; right: 3%; top: 24%; bottom: 38%; }
   .garden-gesture-hint { top: -9px; font-size: 9px; }
   .gift { min-height: 820px; height: 100svh; }
-  .hero, .hero-open { top: max(56px, env(safe-area-inset-top)); width: 88%; left: 6%; text-align: center; }
-  .eyebrow { justify-content: center; font-size: 10px; letter-spacing: .07em; margin-bottom: 17px; gap: 8px; }
+  .hero, .hero-open { top: max(32px, env(safe-area-inset-top)); width: 88%; left: 6%; text-align: center; }
+  .eyebrow { justify-content: center; font-size: 9.5px; letter-spacing: .08em; margin-bottom: 12px; gap: 8px; }
   .hero h1 { font-size: 46px; line-height: 1; }
   .hero h1 > span { display: inline; } .hero h1 > span::after { content: ' '; }
   .hero h1 > span:last-child { display: block; }
