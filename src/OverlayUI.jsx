@@ -65,8 +65,22 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
     <AnimatePresence mode="wait">
       {!entered ? <motion.section key="invitation" className="invitation pointer-events-auto" exit={{ opacity: 0, y: 12 }} transition={transition}>
         <p className="invitation-label">{ui.invitationLabel}</p>
-        <button type="button" className="start-button group flex w-full items-center justify-between gap-5" onClick={onStart} disabled={!ready && !loadSlow}>
-          <span>{ready || loadSlow ? ui.tapToStartText : ui.loading}</span><span className="button-sun transition-transform duration-700 group-hover:rotate-90"><SunIcon className="h-7 w-7" /></span>
+        <button
+          type="button"
+          className="start-button group"
+          onClick={onStart}
+          disabled={!ready && !loadSlow}
+          aria-label={ready || loadSlow ? ui.tapToStartText : ui.loading}
+        >
+          <span className="start-button-ambient-glow" aria-hidden="true" />
+          <span className="start-button-text">
+            {ready || loadSlow ? ui.tapToStartText : ui.loading}
+          </span>
+          <span className="button-sun-wrapper">
+            <span className="button-sun">
+              <SunIcon className="h-6 w-6" />
+            </span>
+          </span>
         </button>
         <p className="start-hint">{ui.startHint}</p>
       </motion.section> : (!exploreMode && <motion.section key={`message-${cycle}`} className={`message-card pointer-events-auto ${actionsOpen ? 'card-contracted' : 'card-extended'}`} aria-label={ui.messageLabel} aria-hidden={!revealed}
