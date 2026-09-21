@@ -30,7 +30,7 @@ function Typewriter({ lines, animation, reducedMotion }) {
   </>
 }
 
-export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, audio, onStart, onReplay, onResetView }) {
+export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, audio, exploreMode, onToggleExplore, onStart, onReplay, onResetView }) {
   const { ui, settings, messages, animation } = config
   const entered = stage !== 'sealed', revealed = stage === 'revealed'
   const copy = text => fill(text, settings)
@@ -38,14 +38,20 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
   const [loadSlow, setLoadSlow] = useState(false)
   useEffect(() => { const timer = window.setTimeout(() => setLoadSlow(true), 5500); return () => window.clearTimeout(timer) }, [])
   return <div className="overlay pointer-events-none relative z-10">
-    <div className={`hero ${entered ? 'hero-open' : ''}`}>
+    {exploreMode && <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={transition} className="explore-floating-banner pointer-events-auto">
+      <button type="button" className="explore-exit-button" onClick={onToggleExplore}>
+        <span aria-hidden="true">✨</span>
+        <span>Volver a la dedicatoria</span>
+      </button>
+    </motion.div>}
+    <div className={`hero ${entered ? 'hero-open' : ''} ${exploreMode ? 'opacity-0 pointer-events-none' : 'transition-opacity duration-500'}`}>
       <motion.p className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={transition}>{settings.date}<span />{ui.season}</motion.p>
       <AnimatePresence mode="wait" initial={false}><motion.h1 key={entered ? 'open' : 'closed'} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={transition}>
         {(entered ? ui.openTitle : ui.startTitle).map((line, i) => <span key={i} className={i === 2 ? 'title-accent' : ''}>{copy(line)}</span>)}
       </motion.h1></AnimatePresence>
       {!entered && <motion.p className="intro" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ ...transition, delay: 0.4 }}>{copy(ui.intro)}</motion.p>}
     </div>
-    <div className="flower-caption" aria-hidden="true"><span className="caption-line" /><span>{entered ? ui.flowerCaptionOpen : ui.flowerCaption}</span></div>
+    {!exploreMode && <div className="flower-caption" aria-hidden="true"><span className="caption-line" /><span>{entered ? ui.flowerCaptionOpen : ui.flowerCaption}</span></div>}
     <AnimatePresence mode="wait">
       {!entered ? <motion.section key="invitation" className="invitation pointer-events-auto" exit={{ opacity: 0, y: 12 }} transition={transition}>
         <p className="invitation-label">{ui.invitationLabel}</p>
@@ -53,17 +59,20 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
           <span>{ready || loadSlow ? ui.tapToStartText : ui.loading}</span><span className="button-sun transition-transform duration-700 group-hover:rotate-90"><SunIcon className="h-7 w-7" /></span>
         </button>
         <p className="start-hint">{ui.startHint}</p>
-      </motion.section> : <motion.section key={`message-${cycle}`} className="message-card pointer-events-auto" aria-label={ui.messageLabel} aria-hidden={!revealed}
+      </motion.section> : (!exploreMode && <motion.section key={`message-${cycle}`} className="message-card pointer-events-auto" aria-label={ui.messageLabel} aria-hidden={!revealed}
         initial={{ opacity: 0, y: 22 }} animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 22 }} transition={transition}>
         <div className="message-top flex items-center justify-between"><span>{copy(ui.messageTo)}</span><SunIcon className="h-5 w-5" /></div>
         {revealed && <Typewriter lines={messages.typewriterLines} animation={animation} reducedMotion={reducedMotion} />}
         <div className="signature">{ui.signaturePrefix}<span>{settings.senderName}</span></div>
-      </motion.section>}
+      </motion.section>)}
     </AnimatePresence>
     <footer className="footer flex items-center justify-end gap-4">
       <div className="footer-actions pointer-events-auto flex items-center gap-4 sm:gap-7">
+        {entered && <button type="button" className="replay-button" onClick={onToggleExplore} aria-label="Modo Explorar en pantalla completa">
+          <span aria-hidden="true">{exploreMode ? '📜' : '👁️'}</span><span>{exploreMode ? 'Ver dedicatoria' : 'Explorar'}</span>
+        </button>}
         {entered && <button type="button" className="replay-button" onClick={onResetView} aria-label={ui.resetViewLabel}>{ui.resetView}</button>}
-        {revealed && <button type="button" className="replay-button" onClick={onReplay} aria-label={ui.replayLabel}><span aria-hidden="true">↺</span><span>{ui.replay}</span></button>}
+        {revealed && !exploreMode && <button type="button" className="replay-button" onClick={onReplay} aria-label={ui.replayLabel}><span aria-hidden="true">↺</span><span>{ui.replay}</span></button>}
         {entered && <button type="button" className="audio-button flex items-center gap-2" onClick={audio.toggle} aria-pressed={audio.status === 'playing'} aria-label={audio.status === 'playing' ? ui.pauseAudio : ui.playAudio}>
           <AudioIcon playing={audio.status === 'playing'} /><span>{ui.audioStates[audio.status]}</span>
         </button>}

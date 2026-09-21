@@ -100,3 +100,8 @@ h1 > span { display: block; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 
+.explore-floating-banner { position: absolute; top: max(24px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 25; }
+.explore-exit-button { display: flex; align-items: center; gap: 9px; padding: 10px 20px; border-radius: 999px; background: color-mix(in srgb, var(--springLight) 75%, transparent); border: 1px solid color-mix(in srgb, var(--accentDark) 35%, transparent); color: var(--accentDark); font-size: 13px; font-weight: 500; backdrop-filter: blur(16px); box-shadow: 0 10px 30px #00000020; transition: transform .25s ease, background .25s ease; }
+.explore-exit-button:hover { transform: scale(1.04); background: var(--springLight); }
+.garden-controls.explore-active { inset: 0 !important; top: 10% !important; bottom: 10% !important; }
+

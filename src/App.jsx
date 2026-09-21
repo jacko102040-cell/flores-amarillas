@@ -18,12 +18,13 @@ export default function App() {
   const [stage, setStage] = useState('sealed')
   const [cycle, setCycle] = useState(0)
   const [sceneReady, setSceneReady] = useState(false)
+  const [exploreMode, setExploreMode] = useState(false)
   const reducedMotion = useReducedMotion()
   const { input, requestOrientation } = useParallax(!reducedMotion)
   const audio = useGiftAudio(config.audio)
   const entered = stage !== 'sealed'
   const startLock = useRef(false)
-  const rotation = useRef({ yaw: 0, pitch: 0, dragging: false })
+  const rotation = useRef({ yaw: 0, pitch: 0, zoom: 1, dragging: false })
   const onReady = useCallback(() => setSceneReady(true), [])
 
   useEffect(() => {
@@ -41,9 +42,6 @@ export default function App() {
   function start() {
     if (startLock.current) return
     startLock.current = true
-    // Both calls run inside the click. Awaiting permission before play() would
-    // lose the original user activation on iOS. HTMLMediaElement needs play(),
-    // not a separate Web Audio AudioContext.
     audio.play()
     requestOrientation()
     setStage('blooming')
@@ -61,11 +59,14 @@ export default function App() {
             reducedMotion={!!reducedMotion} onReady={onReady} onFailure={onReady} fallback={fallback} /></Suspense>
         </SceneBoundary>
       </div>
-      <GardenControls rotation={rotation} config={config} active={entered && sceneReady} cycle={cycle} />
+      <GardenControls rotation={rotation} config={config} active={entered && sceneReady} cycle={cycle} exploreMode={exploreMode} />
       <OverlayUI config={config} stage={stage} cycle={cycle} ready={sceneReady} reducedMotion={!!reducedMotion}
+        exploreMode={exploreMode}
+        onToggleExplore={() => setExploreMode(prev => !prev)}
         onResetView={() => {
           rotation.current.yaw = Math.round(rotation.current.yaw / (Math.PI * 2)) * Math.PI * 2
           rotation.current.pitch = 0
+          rotation.current.zoom = 1
         }}
         audio={audio} onStart={start} onReplay={replay} />
     </main>

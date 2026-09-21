@@ -65,8 +65,10 @@ function Garden({ config, active, cycle, input, reducedMotion, onReady, rotation
     turntable.current.rotation.y = THREE.MathUtils.lerp(turntable.current.rotation.y, turning.yaw, turnDamping)
     turntable.current.rotation.x = THREE.MathUtils.lerp(turntable.current.rotation.x, turning.pitch, turnDamping)
     // Deep background stems swing toward the edge in profile. Make a small,
-    // continuous framing correction, preserving the original frontal scale.
-    turntable.current.scale.setScalar(1 - Math.abs(Math.sin(turntable.current.rotation.y)) * (mobile ? 0.15 : 0.06))
+    // continuous framing correction, preserving the original frontal scale, plus zoom factor.
+    const zoomFactor = turning.zoom ?? 1
+    const baseScale = (1 - Math.abs(Math.sin(turntable.current.rotation.y)) * (mobile ? 0.15 : 0.06)) * zoomFactor
+    turntable.current.scale.setScalar(baseScale)
     camera.position.x = THREE.MathUtils.lerp(camera.position.x, reducedMotion || turning.dragging ? 0 : input.current.x * 0.28, damping)
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, reducedMotion || turning.dragging ? 0 : input.current.y * 0.20, damping)
     camera.lookAt(target)
