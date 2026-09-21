@@ -352,10 +352,11 @@ export default function MoonModel({ config, active, cycle, reducedMotion }) {
             if (radius > 1.65) discard;
 
             const float DISC_R = 0.52;
-            float isDisc = 1.0 - smoothstep(DISC_R - 0.003, DISC_R + 0.003, radius);
+            // Borde difuminado y suave en vez de recorte filoso
+            float isDisc = 1.0 - smoothstep(DISC_R - 0.022, DISC_R + 0.012, radius);
 
             vec3 moonColor = vec3(0.0);
-            if (radius <= DISC_R + 0.02) {
+            if (radius <= DISC_R + 0.03) {
               // True 3D spherical normal mapping
               float z = sqrt(max(0.0, 1.0 - pow(radius / DISC_R, 2.0)));
               vec3 normal = normalize(vec3(p.x, p.y, z));
@@ -366,24 +367,33 @@ export default function MoonModel({ config, active, cycle, reducedMotion }) {
               // Align near side of the Moon facing the camera
               u = fract(u + 0.25);
 
-              vec4 texSample = texture2D(uMoonTexture, vec2(u, v));
+              // Muestreo multi-tap difuminado para suavizar los cráteres demasiado marcados
+              vec2 uvCoord = vec2(u, v);
+              vec4 texCenter = texture2D(uMoonTexture, uvCoord);
+              vec4 tex1 = texture2D(uMoonTexture, uvCoord + vec2(0.0055, 0.0035));
+              vec4 tex2 = texture2D(uMoonTexture, uvCoord + vec2(-0.0055, -0.0035));
+              vec4 tex3 = texture2D(uMoonTexture, uvCoord + vec2(-0.0035, 0.0055));
+              vec4 tex4 = texture2D(uMoonTexture, uvCoord + vec2(0.0035, -0.0055));
+              vec3 blurredRock = texCenter.rgb * 0.32 + (tex1.rgb + tex2.rgb + tex3.rgb + tex4.rgb) * 0.17;
 
-              // Real Lunar Lommel-Seeliger Reflectance
+              // Velo de luz perlada que suaviza el contraste hiperrealista
+              vec3 softVeil = vec3(0.93, 0.96, 1.0);
+              float lum = dot(blurredRock, vec3(0.299, 0.587, 0.114));
+              vec3 rock = mix(blurredRock, softVeil * (lum * 0.52 + 0.48), 0.40);
+
+              // Lommel-Seeliger difuminado y suave
               vec3 sunDir = normalize(vec3(0.32, 0.18, 0.93));
               float NdotL = dot(normal, sunDir);
-              float diffuse = smoothstep(-0.25, 0.85, NdotL) * 0.48 + 0.52;
-              float limbSoftening = pow(z, 0.16);
+              float diffuse = smoothstep(-0.35, 0.88, NdotL) * 0.40 + 0.60;
+              float limbSoftening = pow(z, 0.24);
 
-              // Luminous lunar rock coloration
-              vec3 rock = texSample.rgb;
-              rock = mix(rock, rock * vec3(0.96, 0.98, 1.02), 0.35);
-              moonColor = rock * diffuse * (0.88 + 0.12 * limbSoftening) * 1.15;
+              moonColor = rock * diffuse * (0.86 + 0.14 * limbSoftening) * 1.14;
             }
 
-            // Ethereal atmospheric lunar corona & halo
-            float aureole = exp(-abs(radius - DISC_R) * 22.0) * 0.35;
-            float scattering = exp(-pow(max(radius - DISC_R, 0.0), 1.35) * 4.2) * 0.45;
-            float farMist = exp(-radius * 2.1) * 0.28;
+            // Corona lunar difuminada, suave y etérea
+            float aureole = exp(-abs(radius - DISC_R) * 16.0) * 0.38;
+            float scattering = exp(-pow(max(radius - DISC_R, 0.0), 1.25) * 3.8) * 0.46;
+            float farMist = exp(-radius * 2.0) * 0.28;
 
             float breathing = 0.95 + 0.05 * sin(uTime * 1.1);
             float totalHalo = (aureole + scattering + farMist) * breathing;

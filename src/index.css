@@ -175,7 +175,9 @@ h1 > span { display: block; }
   .garden-controls { left: 3%; right: 3%; top: 24%; bottom: 36%; }
   .garden-gesture-hint { font-size: 10px; letter-spacing: .08em; margin-top: 14px; text-shadow: 0 1px 4px rgba(255, 255, 255, 0.7); }
   .gift { min-height: 820px; height: 100svh; }
-  .hero, .hero-open { top: max(32px, env(safe-area-inset-top)); width: 88%; left: 6%; text-align: center; }
+  .hero { width: 88%; left: 6%; text-align: center; }
+  .hero:not(.hero-open) { top: max(72px, calc(env(safe-area-inset-top) + 32px)); }
+  .hero-open { top: max(32px, env(safe-area-inset-top)); }
   .eyebrow { justify-content: center; font-size: 9.5px; letter-spacing: .08em; margin-bottom: 12px; gap: 8px; }
   .hero h1 { font-size: 46px; line-height: 1; }
   .hero h1 > span { display: inline; } .hero h1 > span::after { content: ' '; }
