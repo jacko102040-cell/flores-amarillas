@@ -10,10 +10,14 @@ function GardenFloor({ colors, count }) {
   const grass = useRef()
   const geometry = useMemo(() => {
     const positions = [], indices = []
-    for (let i = 0; i <= 6; i++) {
-      const t = i / 6, width = 0.038 * (1 - t) + 0.001
-      positions.push(-width + t * t * 0.14, t, t * t * 0.22, width + t * t * 0.14, t, t * t * 0.22)
-      if (i < 6) { const a = i * 2; indices.push(a, a + 1, a + 2, a + 2, a + 1, a + 3) }
+    const rows = 8
+    for (let i = 0; i <= rows; i++) {
+      const t = i / rows
+      const width = 0.052 * Math.pow(1 - t, 0.75) + 0.002
+      const curveX = t * t * 0.18
+      const curveZ = t * t * 0.28 - 0.05 * Math.sin(t * Math.PI)
+      positions.push(-width + curveX, t * 1.15, curveZ, width + curveX, t * 1.15, curveZ)
+      if (i < rows) { const a = i * 2; indices.push(a, a + 1, a + 2, a + 2, a + 1, a + 3) }
     }
     const blade = new THREE.BufferGeometry()
     blade.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
@@ -23,47 +27,52 @@ function GardenFloor({ colors, count }) {
   }, [])
   useEffect(() => () => geometry.dispose(), [geometry])
 
+  const totalCount = count * 3
+
   useLayoutEffect(() => {
     if (!grass.current) return
     const dummy = new THREE.Object3D(), shade = new THREE.Color()
     const dark = new THREE.Color(colors.leafDark), light = new THREE.Color(colors.leaf), gold = new THREE.Color(colors.seedLight)
     
-    const totalCount = count * 2
     for (let i = 0; i < totalCount; i++) {
-      const clusterIndex = Math.floor(i / 8)
-      const clusterAngle = clusterIndex * Math.PI * (3 - Math.sqrt(5))
-      const clusterRadius = Math.sqrt((clusterIndex + 0.5) / (totalCount / 8)) * 3.4
+      const theta = i * Math.PI * (3 - Math.sqrt(5))
+      const radiusRatio = Math.sqrt((i + 0.5) / totalCount)
+      const x = Math.cos(theta) * radiusRatio * 3.6 + (Math.sin(i * 3.1) - 0.5) * 0.35
+      const z = Math.sin(theta) * radiusRatio * 2.4 - 0.45 + (Math.cos(i * 4.3) - 0.5) * 0.35
       
-      const offsetX = (Math.sin(i * 3.7) - 0.5) * 0.45
-      const offsetZ = (Math.cos(i * 4.9) - 0.5) * 0.35
+      // Calculate exact height on top of the ground dome so blades stick out above the soil
+      const nx = Math.min(1, Math.abs(x / 3.85))
+      const nz = Math.min(1, Math.abs((z + 0.45) / 2.65))
+      const domeFactor = Math.max(0, 1 - (nx * nx + nz * nz))
+      const surfaceY = -0.11 + 0.13 * Math.sqrt(domeFactor) - 0.02
       
-      const x = Math.cos(clusterAngle) * clusterRadius * 0.95 + offsetX
-      const z = Math.sin(clusterAngle) * clusterRadius * 0.65 - 0.4 + offsetZ
-      const y = -0.10 + (Math.sin(x * 2 + z * 2) * 0.015)
+      dummy.position.set(x, surfaceY, z)
       
-      dummy.position.set(x, y, z)
-      const bend = Math.sin(i * 2.1) * 0.35 + (i % 2 === 0 ? 0.1 : -0.1)
-      dummy.rotation.set((Math.sin(i * 1.7) - 0.5) * 0.25, i * 1.3, bend)
+      const yaw = theta + (Math.sin(i * 2.7) - 0.5) * 0.8
+      const pitch = (Math.sin(i * 1.9) - 0.5) * 0.28
+      const roll = (Math.cos(i * 3.4) - 0.5) * 0.42
+      dummy.rotation.set(pitch, yaw, roll)
       
-      const isTall = i % 5 === 0
-      const scaleH = (isTall ? 0.35 : 0.16) + (0.5 + Math.sin(i * 8.7) * 0.5) * 0.35
-      const scaleW = 0.8 + (i % 4) * 0.25
-      dummy.scale.set(scaleW, scaleH, 1)
+      const isTall = i % 4 === 0
+      const scaleH = (isTall ? 0.65 : 0.38) + (0.5 + Math.sin(i * 7.3) * 0.5) * 0.45
+      const scaleW = 1.1 + (i % 3) * 0.35
+      dummy.scale.set(scaleW, scaleH, 1.2)
       dummy.updateMatrix()
       grass.current.setMatrixAt(i, dummy.matrix)
 
-      if (i % 11 === 0) {
-        shade.copy(gold).lerp(light, 0.4)
+      // Color variation: mix deep moss green, bright spring green, and golden tips
+      if (i % 9 === 0) {
+        shade.copy(gold).lerp(light, 0.45)
+      } else if (i % 3 === 0) {
+        shade.copy(light).lerp(dark, 0.2)
       } else {
-        shade.copy(dark).lerp(light, 0.25 + (i % 9) / 11)
+        shade.copy(dark).lerp(light, 0.35 + (i % 7) / 10)
       }
       grass.current.setColorAt(i, shade)
     }
     grass.current.instanceMatrix.needsUpdate = true
     grass.current.instanceColor.needsUpdate = true
-  }, [count, colors.leaf, colors.leafDark, colors.seedLight])
-
-  const totalCount = count * 2
+  }, [totalCount, colors.leaf, colors.leafDark, colors.seedLight])
 
   return <>
     {/* Extended organic ground mound */}
@@ -78,9 +87,9 @@ function GardenFloor({ colors, count }) {
       <meshStandardMaterial color={colors.ground} roughness={1} transparent opacity={0.88} />
     </mesh>
 
-    {/* Organic grass tufts */}
+    {/* Rich 3D grass carpet tufts */}
     <instancedMesh ref={grass} args={[geometry, null, totalCount]} frustumCulled={false} receiveShadow>
-      <meshStandardMaterial side={THREE.DoubleSide} roughness={0.88} />
+      <meshStandardMaterial side={THREE.DoubleSide} roughness={0.85} vertexColors />
     </instancedMesh>
   </>
 }
