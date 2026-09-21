@@ -23,26 +23,69 @@ function GardenFloor({ colors, count }) {
   }, [])
   useEffect(() => () => geometry.dispose(), [geometry])
 
-  const totalCount = Math.floor(count * 2.2)
+  // Total grass count spanning central garden + extended infinite meadow
+  const totalCount = Math.floor(count * 22) // ~5,280 on desktop, ~2,860 on mobile
 
   useLayoutEffect(() => {
     if (!grass.current) return
     const dummy = new THREE.Object3D(), shade = new THREE.Color()
     const dark = new THREE.Color(colors.leafDark), light = new THREE.Color(colors.leaf)
     
+    const innerCount = Math.floor(totalCount * 0.35)
+    const midCount = Math.floor(totalCount * 0.75)
+
     for (let i = 0; i < totalCount; i++) {
-      const theta = i * Math.PI * (3 - Math.sqrt(5))
-      const radiusRatio = Math.sqrt((i + 0.5) / totalCount)
-      const x = Math.cos(theta) * radiusRatio * 3.65
-      const z = Math.sin(theta) * radiusRatio * 2.35 - 0.45
+      let x = 0, z = 0
       
-      dummy.position.set(x, 0, z)
-      dummy.rotation.set(0, theta, Math.sin(i * 2.1) * 0.23)
-      dummy.scale.set(0.8 + (i % 3) * 0.2, 0.15 + (0.5 + Math.sin(i * 8.7) * 0.5) * 0.4, 1)
+      if (i < innerCount) {
+        // Inner dense central garden around sunflowers
+        const theta = i * Math.PI * (3 - Math.sqrt(5))
+        const rRatio = Math.sqrt((i + 0.5) / innerCount)
+        x = Math.cos(theta) * rRatio * 3.65
+        z = Math.sin(theta) * rRatio * 2.35 - 0.45
+      } else if (i < midCount) {
+        // Medium meadow coverage (radius 3.5 to 11.5)
+        const idx = i - innerCount
+        const countMid = midCount - innerCount
+        const theta = idx * 2.3999632 // Golden angle
+        const r = 3.5 + Math.pow((idx + 0.5) / countMid, 0.75) * 8.0
+        x = Math.cos(theta) * r
+        z = Math.sin(theta) * r * 0.8 - 0.45
+      } else {
+        // Extended infinite meadow field (radius 11.5 to 25.0)
+        const idx = i - midCount
+        const countFar = totalCount - midCount
+        const theta = idx * 2.3999632
+        const r = 11.5 + Math.pow((idx + 0.5) / countFar, 0.85) * 14.0
+        x = Math.cos(theta) * r
+        z = Math.sin(theta) * r * 0.85 - 0.45
+      }
+      
+      // Calculate exact surface elevation (mound vs flat infinite plane)
+      const dx = x / 3.85
+      const dz = (z + 0.45) / 2.65
+      const distSq = dx * dx + dz * dz
+      let y = -0.135
+      if (distSq < 1.0) {
+        y = -0.11 + 0.13 * Math.sqrt(1.0 - distSq)
+      }
+
+      dummy.position.set(x, y, z)
+      const rotY = (i * 1.7) % (Math.PI * 2)
+      const rotZ = Math.sin(i * 2.1) * 0.25
+      dummy.rotation.set(0, rotY, rotZ)
+      
+      // Scale variations based on zone
+      const hScale = i < innerCount 
+        ? 0.7 + (i % 3) * 0.2 
+        : 0.8 + (i % 5) * 0.25
+      const flexScale = 0.2 + (0.5 + Math.sin(i * 8.7) * 0.5) * 0.45
+      dummy.scale.set(hScale, flexScale, 1)
       dummy.updateMatrix()
       grass.current.setMatrixAt(i, dummy.matrix)
 
-      shade.copy(dark).lerp(light, 0.35 + (i % 7) / 10)
+      // Color variation between dark leaf green and vibrant light leaf green
+      shade.copy(dark).lerp(light, 0.30 + (i % 9) / 11)
       grass.current.setColorAt(i, shade)
     }
     grass.current.instanceMatrix.needsUpdate = true
@@ -50,19 +93,19 @@ function GardenFloor({ colors, count }) {
   }, [totalCount, colors.leaf, colors.leafDark])
 
   return <>
-    {/* Extended organic ground mound */}
+    {/* Central organic mound */}
     <mesh position={[0, -0.11, -0.45]} scale={[3.85, 0.13, 2.65]} receiveShadow>
       <sphereGeometry args={[1, 48, 16]} />
       <meshStandardMaterial color={colors.ground} roughness={0.95} />
     </mesh>
     
-    {/* Background meadow plane so ground is never empty */}
-    <mesh position={[0, -0.14, -0.5]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <circleGeometry args={[10, 32]} />
-      <meshStandardMaterial color={colors.ground} roughness={1} transparent opacity={0.88} />
+    {/* Infinite Meadow Plane extending to the horizon */}
+    <mesh position={[0, -0.135, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <planeGeometry args={[150, 150]} />
+      <meshStandardMaterial color={colors.ground} roughness={1} />
     </mesh>
 
-    {/* Original grass blades extended across full base */}
+    {/* Grass blades extending across the infinite base */}
     <instancedMesh ref={grass} args={[geometry, null, totalCount]} frustumCulled={false} receiveShadow>
       <meshStandardMaterial side={THREE.DoubleSide} roughness={0.9} />
     </instancedMesh>
@@ -103,6 +146,7 @@ function Garden({ config, active, cycle, input, reducedMotion, onReady, rotation
   })
   useEffect(() => { gl.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.6 : 2)) }, [gl, mobile])
   return <>
+    <fog attach="fog" args={[active ? config.ui.colors.springMist : config.ui.colors.backgroundDark, 14, 34]} />
     {config.sun && <SunModel config={config} active={active} cycle={cycle} reducedMotion={reducedMotion} />}
     <ambientLight intensity={active ? 0.75 : 0.28} color={config.ui.colors.ambient} />
     <directionalLight
