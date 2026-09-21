@@ -36,6 +36,7 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
   const copy = text => fill(text, settings)
   const transition = { duration: reducedMotion ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }
   const [loadSlow, setLoadSlow] = useState(false)
+  const [actionsOpen, setActionsOpen] = useState(false)
   useEffect(() => { const timer = window.setTimeout(() => setLoadSlow(true), 5500); return () => window.clearTimeout(timer) }, [])
   return <div className="overlay pointer-events-none relative z-10">
     {exploreMode && <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={transition} className="explore-floating-banner pointer-events-auto">
@@ -66,16 +67,65 @@ export default function OverlayUI({ config, stage, cycle, ready, reducedMotion, 
         <div className="signature"><span>~{settings.senderName}</span></div>
       </motion.section>)}
     </AnimatePresence>
-    <footer className="footer flex items-center justify-end gap-4">
-      <div className="footer-actions pointer-events-auto flex items-center gap-4 sm:gap-7">
-        {entered && <button type="button" className="replay-button" onClick={onToggleExplore} aria-label="Modo Explorar en pantalla completa">
-          <span aria-hidden="true">{exploreMode ? '📜' : '👁️'}</span><span>{exploreMode ? 'Ver dedicatoria' : 'Explorar'}</span>
-        </button>}
-        {entered && <button type="button" className="replay-button" onClick={onResetView} aria-label={ui.resetViewLabel}>{ui.resetView}</button>}
-        {revealed && !exploreMode && <button type="button" className="replay-button" onClick={onReplay} aria-label={ui.replayLabel}><span aria-hidden="true">↺</span><span>{ui.replay}</span></button>}
-        {entered && <button type="button" className="audio-button flex items-center gap-2" onClick={audio.toggle} aria-pressed={audio.status === 'playing'} aria-label={audio.status === 'playing' ? ui.pauseAudio : ui.playAudio}>
-          <AudioIcon playing={audio.status === 'playing'} /><span>{ui.audioStates[audio.status]}</span>
-        </button>}
+    <footer className="footer flex items-center justify-between gap-4 pointer-events-none">
+      <div className="footer-left pointer-events-auto flex items-center gap-2 sm:gap-3">
+        {entered && (
+          <>
+            <button
+              type="button"
+              className="toolbar-toggle"
+              onClick={() => setActionsOpen(v => !v)}
+              aria-label={actionsOpen ? "Ocultar opciones" : "Mostrar opciones"}
+              aria-expanded={actionsOpen}
+              title={actionsOpen ? "Ocultar botones" : "Mostrar botones"}
+            >
+              <svg
+                className={`chevron-arrow ${actionsOpen ? 'is-open' : ''}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+
+            <AnimatePresence>
+              {actionsOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: -12, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -12, scale: 0.95 }}
+                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  className="toolbar-actions"
+                >
+                  <button type="button" className="replay-button" onClick={onToggleExplore} aria-label="Modo Explorar en pantalla completa">
+                    <span aria-hidden="true">{exploreMode ? '📜' : '👁️'}</span><span>{exploreMode ? 'Ver dedicatoria' : 'Explorar'}</span>
+                  </button>
+                  <button type="button" className="replay-button" onClick={onResetView} aria-label={ui.resetViewLabel}>{ui.resetView}</button>
+                  {revealed && !exploreMode && (
+                    <button type="button" className="replay-button" onClick={onReplay} aria-label={ui.replayLabel}>
+                      <span aria-hidden="true">↺</span><span>{ui.replay}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="audio-button flex items-center gap-2"
+                    onClick={audio.toggle}
+                    aria-pressed={audio.status === 'playing'}
+                    aria-label={audio.status === 'playing' ? ui.pauseAudio : ui.playAudio}
+                  >
+                    <AudioIcon playing={audio.status === 'playing'} /><span>{ui.audioStates[audio.status]}</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
+      </div>
+      <div className="footer-right pointer-events-auto">
         {!entered && <span className="sender-note">{copy(ui.senderNote)}</span>}
       </div>
     </footer>
