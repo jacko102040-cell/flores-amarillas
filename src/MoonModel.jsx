@@ -5,48 +5,46 @@ import * as THREE from 'three'
 const smooth = value => { const t = THREE.MathUtils.clamp(value, 0, 1); return t * t * (3 - 2 * t) }
 
 /**
- * Generates an ultra-detailed, photographic 1024x1024 lunar texture map:
- * - Real Lunar Maria (Oceanus Procellarum, Imbrium, Serenitatis, Tranquillitatis, Crisium, etc.)
- * - Mountain ranges (Montes Apenninus, Montes Caucasus)
- * - Extensive Tycho and Copernicus radial ejecta ray systems
- * - Hundreds of micro-craters with directional cast shadows and bright rims
- * - Multi-octave highland roughness and albedo variations
+ * Generates an ultra-soft, organic and photographic 1024x1024 lunar texture.
+ * Completely eliminates sharp geometric circles / "bolitas".
+ * Features naturally feathered, diffused lunar maria, soft crater depressions,
+ * and delicate, misty ray plumes.
  */
-function createPhotorealisticMoonTextures() {
+function createOrganicMoonTextures() {
   const size = 1024
   const canvas = document.createElement('canvas')
   canvas.width = size
   canvas.height = size
   const ctx = canvas.getContext('2d')
 
-  // 1. Lunar Highlands (Anorthosite base - refined silvery ivory)
-  ctx.fillStyle = '#dce5ee'
+  // 1. Base Lunar Highlands (Soft silvery ivory with warm undertones)
+  ctx.fillStyle = '#dbe5f0'
   ctx.fillRect(0, 0, size, size)
 
-  // Multi-frequency rugged highland noise
+  // Natural multi-scale fractal terrain noise (no harsh spots)
   const imgData = ctx.getImageData(0, 0, size, size)
   const d = imgData.data
   for (let y = 0; y < size; y++) {
-    const ny = y * 0.018
+    const ny = y * 0.015
     for (let x = 0; x < size; x++) {
-      const nx = x * 0.018
+      const nx = x * 0.015
       const idx = (y * size + x) * 4
-      const n1 = Math.sin(nx * 3.1 + ny * 2.7) * Math.cos(ny * 3.4 - nx * 2.1)
-      const n2 = Math.sin(nx * 8.5 - ny * 7.2) * 0.5 + Math.cos(nx * 14.1 + ny * 12.3) * 0.25
-      const n3 = Math.sin(x * 0.35 + y * 0.42) * 0.15
-      const noiseVal = (n1 * 0.55 + n2 * 0.35 + n3) * 14.0
+      const n1 = Math.sin(nx * 2.8 + ny * 2.5) * Math.cos(ny * 3.1 - nx * 1.9)
+      const n2 = Math.sin(nx * 7.2 - ny * 6.4) * 0.45 + Math.cos(nx * 12.0 + ny * 10.5) * 0.22
+      const n3 = Math.sin(x * 0.4 + y * 0.5) * 0.12
+      const noiseVal = (n1 * 0.5 + n2 * 0.35 + n3) * 11.0
 
       d[idx] = Math.min(255, Math.max(0, d[idx] + noiseVal))
       d[idx + 1] = Math.min(255, Math.max(0, d[idx + 1] + noiseVal * 0.96))
-      d[idx + 2] = Math.min(255, Math.max(0, d[idx + 2] + noiseVal * 0.92))
+      d[idx + 2] = Math.min(255, Math.max(0, d[idx + 2] + noiseVal * 0.93))
     }
   }
   ctx.putImageData(imgData, 0, 0)
 
-  // 2. Major Lunar Maria (Dark volcanic basalt plains with realistic contours)
+  // 2. Naturally Feathered Lunar Maria (Dark basaltic oceans with high blur)
   ctx.save()
 
-  function drawMare(cx, cy, rx, ry, angle, color, blur = 24) {
+  function drawSoftMare(cx, cy, rx, ry, angle, color, blur = 42) {
     ctx.filter = `blur(${blur}px)`
     ctx.fillStyle = color
     ctx.beginPath()
@@ -54,193 +52,148 @@ function createPhotorealisticMoonTextures() {
     ctx.fill()
   }
 
-  // Oceanus Procellarum (vast western plain)
-  drawMare(360, 480, 190, 160, -0.25, '#566678', 34)
-  drawMare(300, 390, 140, 120, 0.15, '#506072', 30)
+  // Oceanus Procellarum (vast soft western basin)
+  drawSoftMare(370, 480, 200, 170, -0.25, '#506072', 52)
+  drawSoftMare(310, 390, 150, 130, 0.15, '#48586a', 46)
 
-  // Mare Imbrium (great circular impact basin)
-  drawMare(440, 310, 130, 115, -0.1, '#475666', 22)
-  drawMare(450, 315, 95, 85, 0, '#3f4e5e', 18)
+  // Mare Imbrium (great northern circular basin)
+  drawSoftMare(450, 310, 135, 120, -0.1, '#445465', 38)
+  drawSoftMare(455, 315, 95, 85, 0, '#3b4a5a', 30)
 
-  // Sinus Iridum (Bay of Rainbows on northwest rim of Imbrium)
-  drawMare(350, 240, 42, 32, 0.4, '#495868', 12)
+  // Sinus Iridum (Bay of Rainbows)
+  drawSoftMare(355, 235, 45, 35, 0.35, '#465668', 26)
 
   // Mare Serenitatis
-  drawMare(610, 350, 90, 80, 0.1, '#4e5e70', 20)
-  drawMare(615, 345, 65, 60, 0, '#425162', 15)
+  drawSoftMare(615, 350, 95, 85, 0.1, '#49596a', 36)
+  drawSoftMare(620, 345, 65, 60, 0, '#3e4e5e', 28)
 
-  // Mare Tranquillitatis (Titanium-rich, noticeably darker blue-grey)
-  drawMare(670, 470, 105, 85, 0.25, '#404e5e', 22)
-  drawMare(690, 480, 75, 65, 0.2, '#384656', 16)
+  // Mare Tranquillitatis (deeper titanium basaltic tones)
+  drawSoftMare(675, 470, 110, 90, 0.25, '#3b4a5a', 40)
+  drawSoftMare(695, 480, 75, 65, 0.2, '#334150', 32)
 
-  // Mare Crisium (Distinct standalone dark oval with sharp rim)
-  drawMare(815, 370, 62, 48, -0.2, '#3d4b5a', 14)
-  drawMare(815, 370, 44, 34, -0.2, '#33404e', 10)
+  // Mare Crisium (standalone oval, smoothly diffused)
+  drawSoftMare(815, 370, 65, 50, -0.2, '#3a4858', 26)
+  drawSoftMare(815, 370, 44, 34, -0.2, '#313e4d', 20)
 
   // Mare Fecunditatis & Mare Nectaris
-  drawMare(710, 580, 85, 70, 0.35, '#4b5a6c', 22)
-  drawMare(660, 660, 65, 52, 0.3, '#475666', 18)
+  drawSoftMare(715, 580, 90, 75, 0.35, '#475667', 38)
+  drawSoftMare(665, 660, 70, 55, 0.3, '#435262', 32)
 
   // Mare Nubium & Mare Humorum (southwest)
-  drawMare(390, 640, 95, 78, -0.3, '#4d5c6e', 22)
-  drawMare(260, 640, 56, 48, 0, '#415060', 16)
+  drawSoftMare(395, 640, 100, 80, -0.3, '#475668', 38)
+  drawSoftMare(260, 640, 58, 50, 0, '#3d4c5c', 28)
 
-  // Mare Vaporum & Sinus Medii (center of disc)
-  drawMare(520, 460, 55, 42, 0.1, '#495868', 16)
+  // Mare Vaporum (central connection)
+  drawSoftMare(525, 460, 60, 45, 0.1, '#455465', 30)
 
   ctx.restore()
 
-  // 3. Montes Apenninus & Caucasus (Bright mountain ridges bordering Imbrium)
+  // 3. Montes Apenninus (Soft, bright mountain arc bounding Imbrium)
   ctx.save()
-  ctx.strokeStyle = 'rgba(240, 248, 255, 0.65)'
-  ctx.lineWidth = 4
-  ctx.filter = 'blur(2px)'
+  ctx.strokeStyle = 'rgba(245, 250, 255, 0.45)'
+  ctx.lineWidth = 8
+  ctx.filter = 'blur(6px)'
   ctx.beginPath()
-  ctx.arc(440, 320, 125, Math.PI * 0.18, Math.PI * 0.52)
+  ctx.arc(445, 320, 126, Math.PI * 0.18, Math.PI * 0.52)
   ctx.stroke()
   ctx.restore()
 
-  // 4. Tycho Crater & Magnificent Ray System (Southern Highlands)
+  // 4. Soft Diffuse Craters (NO SHARP CIRCLES / "BOLITAS")
+  // Using radial gradients that softly dissolve into the lunar soil with zero hard boundaries
+  ctx.save()
+
+  function drawNaturalCrater(cx, cy, radius, depth = 0.35, blur = 14) {
+    ctx.filter = `blur(${blur}px)`
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius)
+    // Darker soft center
+    grad.addColorStop(0, `rgba(50, 62, 75, ${depth})`)
+    grad.addColorStop(0.55, `rgba(70, 84, 98, ${depth * 0.6})`)
+    // Delicate soft bright rim
+    grad.addColorStop(0.82, `rgba(255, 255, 255, ${depth * 0.85})`)
+    // 100% transparent blend into surrounding surface (no visible circle boundary!)
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)')
+
+    ctx.fillStyle = grad
+    ctx.beginPath()
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  // Major natural crater depressions (softly blurred into the terrain)
+  drawNaturalCrater(520, 810, 48, 0.30, 16) // Tycho depression
+  drawNaturalCrater(375, 460, 40, 0.28, 14) // Copernicus depression
+  drawNaturalCrater(255, 445, 28, 0.24, 12) // Kepler depression
+  drawNaturalCrater(440, 195, 32, 0.35, 12) // Plato dark floor
+  drawNaturalCrater(580, 220, 34, 0.22, 14) // Aristoteles
+  drawNaturalCrater(670, 270, 30, 0.20, 12) // Posidonius
+  drawNaturalCrater(640, 720, 38, 0.25, 15) // Theophilus
+  drawNaturalCrater(740, 670, 36, 0.22, 14) // Petavius
+  drawNaturalCrater(370, 750, 42, 0.26, 16) // Pitatus
+  drawNaturalCrater(280, 720, 34, 0.22, 14) // Bullialdus
+  drawNaturalCrater(440, 860, 46, 0.25, 18) // Clavius
+  drawNaturalCrater(780, 480, 32, 0.20, 13) // Taruntius
+  drawNaturalCrater(210, 520, 30, 0.20, 12) // Grimaldi
+  drawNaturalCrater(190, 320, 28, 0.18, 12) // Marius
+
+  ctx.restore()
+
+  // 5. Tycho Ethereal Ray System (Misty, gossamer plumes instead of drawn lines)
   ctx.save()
   const tyX = 520, tyY = 810
 
-  // 48 realistic radiating ejecta rays fanning across the moon
-  for (let i = 0; i < 48; i++) {
-    const angle = (i * Math.PI * 2) / 48 + Math.sin(i * 3.7) * 0.06
-    const length = 280 + Math.sin(i * 5.3) * 190 + (i % 3 === 0 ? 250 : 0)
-    const rayAlpha = (0.28 + (i % 4 === 0 ? 0.32 : 0.12)) * (1.0 - Math.abs(Math.sin(angle * 2.0)) * 0.25)
+  for (let i = 0; i < 36; i++) {
+    const angle = (i * Math.PI * 2) / 36 + Math.sin(i * 3.4) * 0.08
+    const length = 260 + Math.sin(i * 5.1) * 180 + (i % 3 === 0 ? 220 : 0)
+    const rayAlpha = (0.10 + (i % 4 === 0 ? 0.12 : 0.04))
 
     const grad = ctx.createLinearGradient(tyX, tyY, tyX + Math.cos(angle) * length, tyY + Math.sin(angle) * length)
     grad.addColorStop(0, `rgba(255, 255, 255, ${rayAlpha})`)
-    grad.addColorStop(0.25, `rgba(250, 253, 255, ${rayAlpha * 0.75})`)
-    grad.addColorStop(0.7, `rgba(240, 248, 255, ${rayAlpha * 0.35})`)
+    grad.addColorStop(0.3, `rgba(245, 250, 255, ${rayAlpha * 0.65})`)
     grad.addColorStop(1, 'rgba(240, 248, 255, 0)')
 
     ctx.strokeStyle = grad
-    ctx.lineWidth = i % 5 === 0 ? 3.2 : i % 2 === 0 ? 2.0 : 1.2
+    ctx.lineWidth = i % 4 === 0 ? 12 : i % 2 === 0 ? 7 : 4
+    ctx.filter = 'blur(10px)'
     ctx.beginPath()
     ctx.moveTo(tyX, tyY)
     ctx.lineTo(tyX + Math.cos(angle) * length, tyY + Math.sin(angle) * length)
     ctx.stroke()
   }
 
-  // Tycho crater bright double rim and central peak
-  ctx.fillStyle = '#ffffff'
+  // Tycho core bright glow (soft, diffused nebulous spot, NOT a circle)
+  const tyGlow = ctx.createRadialGradient(tyX, tyY, 0, tyX, tyY, 32)
+  tyGlow.addColorStop(0, 'rgba(255, 255, 255, 0.75)')
+  tyGlow.addColorStop(0.35, 'rgba(250, 253, 255, 0.40)')
+  tyGlow.addColorStop(1, 'rgba(240, 248, 255, 0)')
+  ctx.filter = 'blur(6px)'
+  ctx.fillStyle = tyGlow
   ctx.beginPath()
-  ctx.arc(tyX, tyY, 18, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.fillStyle = '#94a2b0'
-  ctx.beginPath()
-  ctx.arc(tyX + 1, tyY + 1, 12, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.fillStyle = '#ffffff'
-  ctx.beginPath()
-  ctx.arc(tyX, tyY, 4, 0, Math.PI * 2)
+  ctx.arc(tyX, tyY, 32, 0, Math.PI * 2)
   ctx.fill()
 
-  // 5. Copernicus Crater & Ejecta Web (x: 375, y: 460)
+  // Copernicus soft halo
   const copX = 375, copY = 460
-  for (let i = 0; i < 28; i++) {
-    const angle = (i * Math.PI * 2) / 28 + Math.sin(i * 4.1) * 0.08
-    const len = 95 + Math.sin(i * 3.7) * 55
-    const grad = ctx.createLinearGradient(copX, copY, copX + Math.cos(angle) * len, copY + Math.sin(angle) * len)
-    grad.addColorStop(0, 'rgba(255, 255, 255, 0.45)')
-    grad.addColorStop(1, 'rgba(255, 255, 255, 0)')
-    ctx.strokeStyle = grad
-    ctx.lineWidth = 2.0
-    ctx.beginPath()
-    ctx.moveTo(copX, copY)
-    ctx.lineTo(copX + Math.cos(angle) * len, copY + Math.sin(angle) * len)
-    ctx.stroke()
-  }
-  ctx.fillStyle = '#ffffff'
+  const copGlow = ctx.createRadialGradient(copX, copY, 0, copX, copY, 26)
+  copGlow.addColorStop(0, 'rgba(255, 255, 255, 0.65)')
+  copGlow.addColorStop(0.4, 'rgba(248, 252, 255, 0.30)')
+  copGlow.addColorStop(1, 'rgba(240, 248, 255, 0)')
+  ctx.filter = 'blur(6px)'
+  ctx.fillStyle = copGlow
   ctx.beginPath()
-  ctx.arc(copX, copY, 15, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.fillStyle = '#81909e'
-  ctx.beginPath()
-  ctx.arc(copX + 1, copY + 1, 10, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.fillStyle = '#ffffff'
-  ctx.beginPath()
-  ctx.arc(copX, copY, 3, 0, Math.PI * 2)
+  ctx.arc(copX, copY, 26, 0, Math.PI * 2)
   ctx.fill()
 
-  // 6. Kepler Crater (x: 255, y: 445)
-  const kepX = 255, kepY = 445
-  for (let i = 0; i < 16; i++) {
-    const a = (i * Math.PI * 2) / 16
-    const len = 50 + Math.sin(i * 3) * 25
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)'
-    ctx.lineWidth = 1.4
-    ctx.beginPath()
-    ctx.moveTo(kepX, kepY)
-    ctx.lineTo(kepX + Math.cos(a) * len, kepY + Math.sin(a) * len)
-    ctx.stroke()
-  }
-  ctx.fillStyle = '#ffffff'
+  // Aristarchus bright beacon (diffuse brilliant point)
+  const arX = 265, arY = 325
+  const arGlow = ctx.createRadialGradient(arX, arY, 0, arX, arY, 18)
+  arGlow.addColorStop(0, 'rgba(255, 255, 255, 0.85)')
+  arGlow.addColorStop(0.4, 'rgba(248, 252, 255, 0.35)')
+  arGlow.addColorStop(1, 'rgba(240, 248, 255, 0)')
+  ctx.filter = 'blur(4px)'
+  ctx.fillStyle = arGlow
   ctx.beginPath()
-  ctx.arc(kepX, kepY, 9, 0, Math.PI * 2)
+  ctx.arc(arX, arY, 18, 0, Math.PI * 2)
   ctx.fill()
-
-  // 7. Aristarchus Beacon (Brightest point on the Moon: x: 265, y: 325)
-  ctx.fillStyle = '#ffffff'
-  ctx.shadowColor = '#ffffff'
-  ctx.shadowBlur = 12
-  ctx.beginPath()
-  ctx.arc(265, 325, 9, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.shadowBlur = 0
-
-  // 8. Plato (Distinctive dark-floored crater on north rim of Imbrium: x: 440, y: 195)
-  ctx.fillStyle = '#3a4754'
-  ctx.beginPath()
-  ctx.arc(440, 195, 14, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.strokeStyle = '#ffffff'
-  ctx.lineWidth = 2.0
-  ctx.stroke()
-
-  // 9. Hundreds of Micro-Craters across Highlands and Maria
-  const craterList = [
-    [580, 220, 13], [670, 270, 11], [310, 240, 14], [410, 190, 10],
-    [640, 720, 15], [740, 670, 14], [370, 750, 16], [280, 720, 13],
-    [440, 860, 18], [600, 850, 16], [520, 540, 11], [570, 570, 9],
-    [780, 480, 12], [850, 520, 14], [870, 420, 10], [770, 280, 11],
-    [210, 520, 12], [160, 420, 11], [190, 320, 10], [220, 230, 9],
-    [490, 700, 12], [550, 740, 11], [430, 680, 10], [330, 580, 11]
-  ]
-
-  for (const [cx, cy, cr] of craterList) {
-    // Shadow interior (shadow cast from light from upper right)
-    ctx.fillStyle = 'rgba(45, 56, 68, 0.75)'
-    ctx.beginPath()
-    ctx.arc(cx - 1, cy + 1, cr * 0.75, 0, Math.PI * 2)
-    ctx.fill()
-
-    // Illuminated northeast rim
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)'
-    ctx.lineWidth = Math.max(1.4, cr * 0.22)
-    ctx.beginPath()
-    ctx.arc(cx, cy, cr, Math.PI * 0.85, Math.PI * 1.95)
-    ctx.stroke()
-  }
-
-  // 120 fine micro craterlets
-  for (let i = 0; i < 120; i++) {
-    const rx = 120 + ((i * 389) % 784)
-    const ry = 120 + ((i * 547) % 784)
-    const rad = 3 + (i % 5)
-    ctx.fillStyle = 'rgba(50, 60, 72, 0.65)'
-    ctx.beginPath()
-    ctx.arc(rx, ry, rad * 0.7, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)'
-    ctx.lineWidth = 1.0
-    ctx.beginPath()
-    ctx.arc(rx, ry, rad, Math.PI * 0.9, Math.PI * 1.9)
-    ctx.stroke()
-  }
 
   ctx.restore()
 
@@ -294,9 +247,9 @@ function NightStars({ active, bloomDuration = 3.6, cycle }) {
       const starVec = new THREE.Vector3(x, y, z).normalize()
       const cosAngle = starVec.dot(moonDir)
 
-      // cos(26 degrees) is ~0.898. Exclude anything within ~27 degrees of Moon!
+      // Exclude anything within ~27 degrees of Moon
       if (cosAngle > 0.89) {
-        continue // Skip star inside/near the Moon
+        continue
       }
 
       positions[placed * 3] = x
@@ -388,8 +341,9 @@ function NightStars({ active, bloomDuration = 3.6, cycle }) {
 
 /**
  * Photorealistic Moon Model:
- * - High-resolution 1024x1024 baked photographic lunar texture map
- * - Accurate 3D spherical normal mapping & Lommel-Seeliger non-Lambertian lunar reflectance
+ * - Ultra-soft organic lunar geography with zero artificial circles or "bolitas"
+ * - Naturally feathered basaltic maria and diffused crater depressions
+ * - 3D spherical normal mapping & Lommel-Seeliger non-Lambertian lunar reflectance
  * - Organic atmospheric lunar corona (zero bounding box artifacts)
  * - Night stars with strict exclusion zone around the Moon
  */
@@ -397,15 +351,15 @@ export default function MoonModel({ config, active, cycle, reducedMotion }) {
   const mesh = useRef(), light = useRef(), elapsed = useRef(0)
   const position = useMemo(() => new THREE.Vector3(), [])
 
-  // 1024x1024 high-res lunar texture map
-  const moonTexture = useMemo(() => createPhotorealisticMoonTextures(), [])
+  // 1024x1024 organic lunar texture map
+  const moonTexture = useMemo(() => createOrganicMoonTextures(), [])
   useEffect(() => () => moonTexture.dispose(), [moonTexture])
 
   const uniforms = useMemo(() => ({
     uReveal: { value: 1.0 },
     uTime: { value: 0 },
     uMoonTexture: { value: moonTexture },
-    uHaloColor: { value: new THREE.Color('#98bcf0') },
+    uHaloColor: { value: new THREE.Color('#94b8ea') },
   }), [moonTexture])
 
   useEffect(() => {
