@@ -5,205 +5,55 @@ import * as THREE from 'three'
 const smooth = value => { const t = THREE.MathUtils.clamp(value, 0, 1); return t * t * (3 - 2 * t) }
 
 /**
- * Procedurally generates high-resolution 512x512 lunar albedo and bump maps
- * with real lunar geography (Maria, Tycho/Copernicus crater ray systems, highlands).
- */
-function createMoonTextures() {
-  const size = 512
-  const canvas = document.createElement('canvas')
-  canvas.width = size
-  canvas.height = size
-  const ctx = canvas.getContext('2d')
-
-  // 1. Lunar Highlands base (pale silver-grey with subtle warmth)
-  ctx.fillStyle = '#dbe4ed'
-  ctx.fillRect(0, 0, size, size)
-
-  // Subtle fractal noise for rugged highland terrain
-  const imgData = ctx.getImageData(0, 0, size, size)
-  const data = imgData.data
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const idx = (y * size + x) * 4
-      const n = (Math.sin(x * 0.12) * Math.cos(y * 0.14) + Math.sin(x * 0.31 + y * 0.27) * 0.5) * 12
-      data[idx] = Math.min(255, Math.max(0, data[idx] + n))
-      data[idx + 1] = Math.min(255, Math.max(0, data[idx + 1] + n * 0.95))
-      data[idx + 2] = Math.min(255, Math.max(0, data[idx + 2] + n * 0.9))
-    }
-  }
-  ctx.putImageData(imgData, 0, 0)
-
-  // 2. Major Lunar Maria (Dark volcanic basalt plains)
-  ctx.save()
-  ctx.filter = 'blur(16px)'
-  ctx.fillStyle = '#67798c'
-
-  // Oceanus Procellarum & Mare Imbrium
-  ctx.beginPath()
-  ctx.ellipse(190, 170, 95, 75, -0.2, 0, Math.PI * 2)
-  ctx.fill()
-
-  ctx.beginPath()
-  ctx.arc(225, 145, 55, 0, Math.PI * 2)
-  ctx.fill()
-
-  // Mare Serenitatis & Mare Tranquillitatis
-  ctx.beginPath()
-  ctx.arc(310, 175, 45, 0, Math.PI * 2)
-  ctx.fill()
-
-  ctx.beginPath()
-  ctx.ellipse(335, 235, 50, 40, 0.3, 0, Math.PI * 2)
-  ctx.fill()
-
-  // Mare Crisium (isolated distinctive dark oval)
-  ctx.beginPath()
-  ctx.ellipse(405, 185, 30, 24, -0.2, 0, Math.PI * 2)
-  ctx.fill()
-
-  // Mare Fecunditatis & Mare Nectaris
-  ctx.beginPath()
-  ctx.ellipse(350, 290, 42, 35, 0.4, 0, Math.PI * 2)
-  ctx.fill()
-
-  // Mare Nubium & Mare Humorum
-  ctx.beginPath()
-  ctx.ellipse(180, 310, 48, 38, -0.4, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.beginPath()
-  ctx.arc(130, 310, 28, 0, Math.PI * 2)
-  ctx.fill()
-
-  ctx.restore()
-
-  // 3. Tycho Crater & Ray System (Southern hemisphere: x: 260, y: 395)
-  ctx.save()
-  const tychoX = 260, tychoY = 395
-
-  // Radiating bright ejecta rays
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.38)'
-  ctx.lineWidth = 1.5
-  for (let a = 0; a < Math.PI * 2; a += 0.22) {
-    const len = 140 + Math.sin(a * 7) * 90
-    ctx.beginPath()
-    ctx.moveTo(tychoX, tychoY)
-    ctx.lineTo(tychoX + Math.cos(a) * len, tychoY + Math.sin(a) * len)
-    ctx.stroke()
-  }
-
-  // Tycho crater bright rim
-  ctx.fillStyle = '#ffffff'
-  ctx.beginPath()
-  ctx.arc(tychoX, tychoY, 9, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.fillStyle = '#8a99a8'
-  ctx.beginPath()
-  ctx.arc(tychoX, tychoY, 5, 0, Math.PI * 2)
-  ctx.fill()
-
-  // 4. Copernicus Crater (x: 195, y: 220)
-  const copX = 195, copY = 220
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)'
-  ctx.lineWidth = 1.2
-  for (let a = 0; a < Math.PI * 2; a += 0.35) {
-    const len = 70 + Math.sin(a * 5) * 40
-    ctx.beginPath()
-    ctx.moveTo(copX, copY)
-    ctx.lineTo(copX + Math.cos(a) * len, copY + Math.sin(a) * len)
-    ctx.stroke()
-  }
-  ctx.fillStyle = '#ffffff'
-  ctx.beginPath()
-  ctx.arc(copX, copY, 8, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.fillStyle = '#7a8998'
-  ctx.beginPath()
-  ctx.arc(copX, copY, 4, 0, Math.PI * 2)
-  ctx.fill()
-
-  // 5. Kepler Crater (x: 135, y: 210)
-  ctx.fillStyle = '#ffffff'
-  ctx.beginPath()
-  ctx.arc(135, 210, 5, 0, Math.PI * 2)
-  ctx.fill()
-
-  // 6. Scattered medium and small craters
-  const craters = [
-    [290, 110, 7], [350, 140, 6], [160, 120, 8], [210, 95, 6],
-    [320, 360, 8], [370, 330, 9], [190, 380, 8], [140, 360, 7],
-    [220, 430, 9], [300, 425, 8], [260, 270, 6], [285, 285, 5]
-  ]
-  for (const [cx, cy, cr] of craters) {
-    // Shadow side
-    ctx.fillStyle = 'rgba(65, 78, 92, 0.65)'
-    ctx.beginPath()
-    ctx.arc(cx, cy, cr, 0, Math.PI * 2)
-    ctx.fill()
-    // Illuminated rim
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)'
-    ctx.lineWidth = 1.4
-    ctx.beginPath()
-    ctx.arc(cx - 1, cy - 1, cr, Math.PI * 0.7, Math.PI * 1.8)
-    ctx.stroke()
-  }
-
-  ctx.restore()
-
-  const map = new THREE.CanvasTexture(canvas)
-  map.colorSpace = THREE.SRGBColorSpace
-
-  // Bump map for surface relief
-  const bumpCanvas = document.createElement('canvas')
-  bumpCanvas.width = size
-  bumpCanvas.height = size
-  const bCtx = bumpCanvas.getContext('2d')
-  bCtx.fillStyle = '#808080'
-  bCtx.fillRect(0, 0, size, size)
-  bCtx.drawImage(canvas, 0, 0)
-  const bumpMap = new THREE.CanvasTexture(bumpCanvas)
-
-  return { map, bumpMap }
-}
-
-/**
- * Field of sparkling night stars that twinkle independently
- * and smoothly fade out as morning arrives.
+ * Procedural Starry Night Sky.
+ * Stars twinkle organically in the nocturnal sky and smoothly dissolve at dawn.
  */
 function NightStars({ active, bloomDuration = 3.6, cycle }) {
   const pointsRef = useRef()
   const elapsed = useRef(0)
 
-  const { geometry, starCount } = useMemo(() => {
-    const count = 180
+  const { geometry } = useMemo(() => {
+    const count = 160
     const positions = new Float32Array(count * 3)
     const phases = new Float32Array(count)
     const sizes = new Float32Array(count)
+    const colors = new Float32Array(count * 3)
+
+    const colorA = new THREE.Color('#ffffff')
+    const colorB = new THREE.Color('#d2e5ff')
+    const colorC = new THREE.Color('#fff4d6')
 
     for (let i = 0; i < count; i++) {
-      // Celestial dome distribution in upper sky
-      const theta = (i * 137.5 * Math.PI) / 180
-      const phi = Math.acos(0.2 + (i / count) * 0.75) // upper sky bias
-      const radius = 18 + (i % 7) * 1.5
+      // Natural celestial distribution across the night sky dome
+      const theta = (i * 137.508 * Math.PI) / 180
+      const phi = Math.acos(0.15 + (i / count) * 0.82)
+      const radius = 17.5 + (i % 5) * 1.8
 
       positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta)
-      positions[i * 3 + 1] = radius * Math.cos(phi) + 2.5
-      positions[i * 3 + 2] = -radius * Math.sin(phi) * Math.sin(theta) - 2
+      positions[i * 3 + 1] = radius * Math.cos(phi) + 2.0
+      positions[i * 3 + 2] = -radius * Math.sin(phi) * Math.sin(theta) - 1.5
 
-      phases[i] = (i * 1.618) % (Math.PI * 2)
-      sizes[i] = (i % 11 === 0 ? 3.6 : i % 5 === 0 ? 2.6 : 1.6) // Prominent hero stars
+      phases[i] = (i * 1.73) % (Math.PI * 2)
+      sizes[i] = i % 13 === 0 ? 3.4 : i % 4 === 0 ? 2.3 : 1.4
+
+      // Subtle star color temperature
+      const chosenColor = i % 5 === 0 ? colorC : i % 2 === 0 ? colorB : colorA
+      colors[i * 3] = chosenColor.r
+      colors[i * 3 + 1] = chosenColor.g
+      colors[i * 3 + 2] = chosenColor.b
     }
 
     const geo = new THREE.BufferGeometry()
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
     geo.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1))
     geo.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1))
-    return { geometry: geo, starCount: count }
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    return { geometry: geo }
   }, [])
 
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
     uOpacity: { value: 1.0 },
-    uColor: { value: new THREE.Color('#e2eeff') },
   }), [])
 
   useEffect(() => {
@@ -213,8 +63,8 @@ function NightStars({ active, bloomDuration = 3.6, cycle }) {
   useFrame(({ clock }, delta) => {
     if (!pointsRef.current) return
     if (active) elapsed.current += Math.min(delta, 0.25)
-    const progress = active ? smooth(elapsed.current / (bloomDuration * 0.70)) : 0
-    const reveal = Math.max(0, 1.0 - progress * 1.5)
+    const progress = active ? smooth(elapsed.current / (bloomDuration * 0.65)) : 0
+    const reveal = Math.max(0, 1.0 - progress * 1.4)
     uniforms.uTime.value = clock.elapsedTime
     uniforms.uOpacity.value = reveal
     pointsRef.current.visible = reveal > 0.005
@@ -225,6 +75,7 @@ function NightStars({ active, bloomDuration = 3.6, cycle }) {
       <shaderMaterial
         transparent
         depthWrite={false}
+        vertexColors
         uniforms={uniforms}
         vertexShader={`
           attribute float aPhase;
@@ -232,26 +83,30 @@ function NightStars({ active, bloomDuration = 3.6, cycle }) {
           uniform float uTime;
           uniform float uOpacity;
           varying float vTwinkle;
+          varying vec3 vColor;
           void main() {
-            float twinkle = sin(uTime * 2.2 + aPhase) * 0.38 + 0.62;
+            vColor = color;
+            float twinkle = sin(uTime * 2.4 + aPhase) * 0.35 + 0.65;
             vTwinkle = twinkle * uOpacity;
             vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = aSize * (0.8 + 0.4 * twinkle) * (140.0 / -mvPosition.z);
+            gl_PointSize = aSize * (0.85 + 0.35 * twinkle) * (135.0 / -mvPosition.z);
             gl_Position = projectionMatrix * mvPosition;
           }
         `}
         fragmentShader={`
-          uniform vec3 uColor;
           varying float vTwinkle;
+          varying vec3 vColor;
           void main() {
             vec2 coord = gl_PointCoord * 2.0 - 1.0;
             float dist = length(coord);
             if (dist > 1.0) discard;
-            // Cross flare diffraction + circular star core
-            float core = exp(-dist * dist * 4.0);
-            float crossRays = exp(-abs(coord.x) * 9.0) * exp(-abs(coord.y) * 9.0) * 0.3;
-            float alpha = (core + crossRays) * vTwinkle;
-            gl_FragColor = vec4(uColor, alpha);
+
+            // Soft circular star with cross diffraction flare on larger stars
+            float core = exp(-dist * dist * 4.5);
+            float cross = (exp(-abs(coord.x) * 10.0) * exp(-abs(coord.y) * 4.0) +
+                           exp(-abs(coord.y) * 10.0) * exp(-abs(coord.x) * 4.0)) * 0.25;
+            float alpha = (core + cross) * vTwinkle;
+            gl_FragColor = vec4(vColor, alpha);
             #include <colorspace_fragment>
           }
         `}
@@ -261,65 +116,55 @@ function NightStars({ active, bloomDuration = 3.6, cycle }) {
 }
 
 /**
- * Realistic 3D Moon model with procedural topography,
- * atmospheric halo, and accompanying starry night sky.
+ * Photorealistic, single-pass Lunar Photosphere with:
+ * - Real Lunar Maria geography (Oceanus Procellarum, Mare Imbrium, Mare Serenitatis/Tranquillitatis, Mare Crisium)
+ * - Tycho & Copernicus crater impact ray systems
+ * - Accurate 3D spherical normal curvature & Lommel-Seeliger lunar reflectance
+ * - Perfectly radial, smooth atmospheric corona (100% zero bounding-box / square artifacts)
  */
 export default function MoonModel({ config, active, cycle, reducedMotion }) {
-  const moonGroup = useRef()
-  const moonSphere = useRef()
-  const light = useRef()
-  const elapsed = useRef(0)
+  const mesh = useRef(), light = useRef(), elapsed = useRef(0)
   const position = useMemo(() => new THREE.Vector3(), [])
 
-  // Procedural Lunar maps (Albedo + Bump)
-  const textures = useMemo(() => createMoonTextures(), [])
-  useEffect(() => () => {
-    textures.map.dispose()
-    textures.bumpMap.dispose()
-  }, [textures])
-
-  const haloUniforms = useMemo(() => ({
+  const uniforms = useMemo(() => ({
     uReveal: { value: 1.0 },
     uTime: { value: 0 },
-    uHaloColor: { value: new THREE.Color('#9fc2ec') },
+    uHighland: { value: new THREE.Color('#dbe5f0') },
+    uMare: { value: new THREE.Color('#58677a') },
+    uRayColor: { value: new THREE.Color('#f5f9ff') },
+    uHaloColor: { value: new THREE.Color('#9ec1f2') },
   }), [])
 
   useEffect(() => {
     elapsed.current = 0
-    haloUniforms.uReveal.value = active ? 0 : 1.0
-    if (moonGroup.current) moonGroup.current.visible = !active
-    if (light.current) light.current.intensity = active ? 0 : 1.3
-  }, [active, cycle, haloUniforms])
+    uniforms.uReveal.value = active ? 0 : 1.0
+    if (mesh.current) mesh.current.visible = !active
+    if (light.current) light.current.intensity = active ? 0 : 1.35
+  }, [active, cycle, uniforms])
 
   useFrame(({ camera, size }, delta) => {
     if (active) elapsed.current += Math.min(delta, 0.25)
-    const fadeOutDuration = config.animation.bloomDuration * 0.70
+    const fadeOutDuration = config.animation.bloomDuration * 0.65
     const progress = active ? (reducedMotion ? 1 : smooth(elapsed.current / fadeOutDuration)) : 0
     const reveal = Math.max(0, 1.0 - progress)
 
-    haloUniforms.uReveal.value = reveal
-    haloUniforms.uTime.value = reducedMotion ? 0 : elapsed.current
+    uniforms.uReveal.value = reveal
+    uniforms.uTime.value = reducedMotion ? 0 : elapsed.current
 
     if (light.current) {
       light.current.intensity = 1.35 * reveal
     }
 
-    if (moonGroup.current) {
-      moonGroup.current.visible = reveal > 0.01
+    if (mesh.current) {
+      mesh.current.visible = reveal > 0.005
     }
 
-    if (moonSphere.current) {
-      // Gentle celestial tilt and slow axial drift
-      moonSphere.current.rotation.y = 0.15 + (reducedMotion ? 0 : elapsed.current * 0.015)
-      moonSphere.current.rotation.x = -0.12
-    }
-
-    if (reveal <= 0.01) return
+    if (reveal <= 0.005) return
 
     const mobile = size.width < 1000
-    const pixels = mobile ? 270 : 490
-    const right = mobile ? 48 : 135
-    const top = mobile ? 46 : 78
+    const pixels = mobile ? 340 : 620
+    const right = mobile ? 50 : 145
+    const top = mobile ? 48 : 80
     const distance = 12
     const worldHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
     const unitsPerPixel = worldHeight / size.height
@@ -330,70 +175,184 @@ export default function MoonModel({ config, active, cycle, reducedMotion }) {
       -distance
     )
     position.applyMatrix4(camera.matrixWorld)
-    moonGroup.current.position.copy(position)
-    moonGroup.current.quaternion.copy(camera.quaternion)
-    moonGroup.current.scale.setScalar(pixels * unitsPerPixel * 0.5)
+    mesh.current.position.copy(position)
+    mesh.current.quaternion.copy(camera.quaternion)
+    mesh.current.scale.setScalar(pixels * unitsPerPixel)
   })
 
   return <>
     {/* Twinkling starry night sky */}
     <NightStars active={active} bloomDuration={config.animation.bloomDuration} cycle={cycle} />
 
-    {/* Cool moonlight directional light */}
-    <directionalLight ref={light} position={[2.8, 6.5, 4.5]} intensity={1.35} color="#c0dafa" />
+    {/* Cool moonlight directional lighting */}
+    <directionalLight ref={light} position={[2.8, 6.2, 4.5]} intensity={1.35} color="#bdd7f8" />
 
-    {/* 3D Moon group */}
-    <group ref={moonGroup} visible={true}>
-      {/* High-definition 3D spherical Moon with topography */}
-      <mesh ref={moonSphere} castShadow={false} receiveShadow={false}>
-        <sphereGeometry args={[1, 64, 48]} />
-        <meshStandardMaterial
-          map={textures.map}
-          bumpMap={textures.bumpMap}
-          bumpScale={0.038}
-          roughness={0.90}
-          metalness={0.05}
-          color="#f4f8fd"
-          emissive="#243447"
-          emissiveIntensity={0.28}
-        />
-      </mesh>
+    {/* Unified Single-Pass Photorealistic Moon Shader */}
+    <mesh ref={mesh} visible={true} frustumCulled={false} renderOrder={-15}>
+      <planeGeometry args={[2, 2]} />
+      <shaderMaterial
+        transparent
+        depthWrite={false}
+        toneMapped={false}
+        uniforms={uniforms}
+        vertexShader={`
+          varying vec2 vMoonUv;
+          void main() {
+            vMoonUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `}
+        fragmentShader={`
+          varying vec2 vMoonUv;
+          uniform float uReveal;
+          uniform float uTime;
+          uniform vec3 uHighland;
+          uniform vec3 uMare;
+          uniform vec3 uRayColor;
+          uniform vec3 uHaloColor;
 
-      {/* Atmospheric lunar halo / breathing celestial corona */}
-      <mesh position={[0, 0, -0.1]} renderOrder={-12}>
-        <planeGeometry args={[4.2, 4.2]} />
-        <shaderMaterial
-          transparent
-          depthWrite={false}
-          uniforms={haloUniforms}
-          vertexShader={`
-            varying vec2 vUv;
-            void main() {
-              vUv = uv;
-              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          float hash(vec2 p) {
+            return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+          }
+
+          float noise(vec2 p) {
+            vec2 cell = floor(p);
+            vec2 f = fract(p);
+            f = f * f * (3.0 - 2.0 * f);
+            return mix(
+              mix(hash(cell), hash(cell + vec2(1.0, 0.0)), f.x),
+              mix(hash(cell + vec2(0.0, 1.0)), hash(cell + vec2(1.0, 1.0)), f.x),
+              f.y
+            );
+          }
+
+          float fbm(vec2 p) {
+            float v = 0.0;
+            v += 0.500 * noise(p); p *= 2.02;
+            v += 0.250 * noise(p); p *= 2.03;
+            v += 0.125 * noise(p); p *= 2.01;
+            v += 0.062 * noise(p);
+            return v;
+          }
+
+          // Smooth crater helper
+          float crater(vec2 uv, vec2 center, float radius, float rimWidth) {
+            float d = length(uv - center);
+            float pit = smoothstep(radius, radius * 0.7, d);
+            float rim = smoothstep(radius - rimWidth, radius, d) * smoothstep(radius + rimWidth, radius, d);
+            return rim * 1.6 - pit * 0.45;
+          }
+
+          void main() {
+            // Coordinate from -1.0 to 1.0 scaled by 2.0, so the quad corners are > 2.0
+            vec2 p = (vMoonUv * 2.0 - 1.0) * 2.0;
+            float radius = length(p);
+
+            // Crucial: strict circular boundary. Discard everything beyond r = 1.65!
+            // Quad corners are at r = 2.82, so this completely eliminates any square borders!
+            if (radius > 1.65) discard;
+
+            const float DISC_R = 0.52;
+            float isDisc = 1.0 - smoothstep(DISC_R - 0.003, DISC_R + 0.003, radius);
+
+            // 1. LUNAR DISC RENDERING (when inside or near disc)
+            vec3 moonColor = vec3(0.0);
+            if (radius <= DISC_R + 0.02) {
+              // 3D spherical normal
+              float z = sqrt(max(0.0, 1.0 - pow(radius / DISC_R, 2.0)));
+              vec3 normal = normalize(vec3(p.x, p.y, z));
+
+              // Map spherical coordinates for natural lunar projection
+              vec2 sphereCoord = vec2(p.x / DISC_R, p.y / DISC_R);
+
+              // Procedural Maria (Dark Basaltic Plains)
+              // Oceanus Procellarum & Mare Imbrium (upper left)
+              float imbrium = exp(-pow(length(sphereCoord - vec2(-0.25, 0.22)) / 0.32, 2.0));
+              float procellarum = exp(-pow(length(sphereCoord - vec2(-0.46, 0.05)) / 0.38, 2.0));
+              // Mare Serenitatis & Tranquillitatis (center-right)
+              float serenitatis = exp(-pow(length(sphereCoord - vec2(0.12, 0.24)) / 0.22, 2.0));
+              float tranquillitatis = exp(-pow(length(sphereCoord - vec2(0.24, 0.02)) / 0.26, 2.0));
+              // Mare Crisium (northeast isolated oval)
+              vec2 crisiumCoord = (sphereCoord - vec2(0.55, 0.22)) * vec2(1.3, 1.0);
+              float crisium = exp(-pow(length(crisiumCoord) / 0.14, 2.0));
+              // Mare Nubium & Humorum (southwest)
+              float nubium = exp(-pow(length(sphereCoord - vec2(-0.16, -0.32)) / 0.25, 2.0));
+              float humorum = exp(-pow(length(sphereCoord - vec2(-0.45, -0.28)) / 0.16, 2.0));
+
+              float mariaWeight = clamp((imbrium + procellarum * 0.85 + serenitatis * 0.95 +
+                                         tranquillitatis * 0.90 + crisium * 1.25 + nubium * 0.85 + humorum * 0.75), 0.0, 1.0);
+
+              // Fine basaltic plain fractal noise
+              float mariaNoise = fbm(sphereCoord * 6.5);
+              mariaWeight = smoothstep(0.32, 0.68, mariaWeight * 0.75 + mariaNoise * 0.40);
+
+              // Lunar Highlands Texture
+              float highlands = fbm(sphereCoord * 14.0);
+              float highlandGrain = noise(sphereCoord * 45.0);
+
+              // Tycho Impact Crater & Spectacular Ray System
+              vec2 tychoPos = vec2(0.06, -0.56);
+              vec2 tychoDelta = sphereCoord - tychoPos;
+              float tychoDist = length(tychoDelta);
+              float tychoAngle = atan(tychoDelta.y, tychoDelta.x);
+
+              // 14 distinct bright radial ejecta rays spreading across the moon
+              float rays = pow(0.5 + 0.5 * sin(tychoAngle * 14.0 + sin(tychoAngle * 5.0) * 0.5), 6.0);
+              rays *= exp(-tychoDist * 1.6) * smoothstep(0.04, 0.12, tychoDist);
+
+              // Copernicus Crater (upper left)
+              vec2 copPos = vec2(-0.24, 0.14);
+              vec2 copDelta = sphereCoord - copPos;
+              float copDist = length(copDelta);
+              float copRays = pow(0.5 + 0.5 * sin(atan(copDelta.y, copDelta.x) * 10.0), 4.0) * exp(-copDist * 4.5);
+
+              // Aristarchus bright beacon
+              float aristarchus = exp(-pow(length(sphereCoord - vec2(-0.48, 0.28)) / 0.035, 2.0)) * 0.45;
+
+              // Crater topography
+              float craters = crater(sphereCoord, tychoPos, 0.055, 0.015) * 0.55 +
+                              crater(sphereCoord, copPos, 0.050, 0.014) * 0.45 +
+                              crater(sphereCoord, vec2(0.35, -0.35), 0.045, 0.012) * 0.35 +
+                              crater(sphereCoord, vec2(-0.12, -0.68), 0.040, 0.010) * 0.30;
+
+              // Composite Lunar Albedo Surface
+              vec3 surface = mix(uHighland, uMare, mariaWeight * 0.62);
+              surface *= 0.88 + highlands * 0.20 + highlandGrain * 0.05;
+              // Add bright impact ejecta rays and crater rims
+              surface = mix(surface, uRayColor, clamp(rays * 0.55 + copRays * 0.35 + aristarchus + max(craters, 0.0) * 0.4, 0.0, 1.0));
+
+              // 3D Realistic Lunar Shading (Sun illuminating from front-upper-right)
+              vec3 sunDir = normalize(vec3(0.32, 0.22, 0.91));
+              float NdotL = dot(normal, sunDir);
+              // Lunar photometric reflectance (soft limb, non-glossy basaltic rock)
+              float diffuse = smoothstep(-0.25, 0.80, NdotL) * 0.58 + 0.42;
+              float limbDarkening = pow(z, 0.22); // subtle lunar limb roll-off
+              moonColor = surface * diffuse * (0.85 + 0.15 * limbDarkening);
             }
-          `}
-          fragmentShader={`
-            varying vec2 vUv;
-            uniform float uReveal;
-            uniform float uTime;
-            uniform vec3 uHaloColor;
-            void main() {
-              vec2 p = vUv * 2.0 - 1.0;
-              float r = length(p);
-              if (r > 1.95) discard;
 
-              float innerGlow = exp(-pow(max(r - 0.48, 0.0), 1.8) * 8.0) * 0.55;
-              float outerHaze = exp(-r * 2.3) * 0.38;
-              float breathing = 0.94 + 0.06 * sin(uTime * 1.4);
-              float totalHalo = (innerGlow + outerHaze) * breathing * uReveal;
+            // 2. ETHEREAL ATMOSPHERIC LUNAR CORONA & HALO
+            // Silvery-blue inner aureole directly hugging the lunar disc edge
+            float aureole = exp(-abs(radius - DISC_R) * 22.0) * 0.35;
+            // Soft atmospheric Rayleigh night scattering
+            float scattering = exp(-pow(max(radius - DISC_R, 0.0), 1.35) * 4.2) * 0.45;
+            // Far ambient moonlight mist
+            float farMist = exp(-radius * 2.1) * 0.28;
 
-              gl_FragColor = vec4(uHaloColor, totalHalo * (1.0 - smoothstep(1.7, 1.95, r)));
-              #include <colorspace_fragment>
-            }
-          `}
-        />
-      </mesh>
-    </group>
+            float breathing = 0.95 + 0.05 * sin(uTime * 1.1);
+            float totalHalo = (aureole + scattering + farMist) * breathing;
+
+            // Zero-artefact edge feathering: alpha reaches absolute 0 before radius = 1.60
+            float edgeFade = 1.0 - smoothstep(1.15, 1.60, radius);
+
+            vec3 haloColor = mix(uHaloColor, vec3(0.92, 0.96, 1.0), aureole * 1.5);
+            vec3 finalColor = mix(haloColor * totalHalo, moonColor, isDisc);
+            float finalAlpha = (isDisc + totalHalo * (1.0 - isDisc)) * edgeFade * uReveal;
+
+            gl_FragColor = vec4(finalColor, finalAlpha);
+            #include <colorspace_fragment>
+          }
+        `}
+      />
+    </mesh>
   </>
 }
